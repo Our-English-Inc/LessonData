@@ -1,16 +1,30 @@
+// ====== Variables ======
+
+let currentPage = 1;
+let rowsPerPage = 10;
+
+// ====== Head Logics ======
+
 // Update lesson count in Head
 function updateLessonCount() {
   const countEl = document.getElementById("lesson-count");
   countEl.textContent = `(${lessons.length})`;
 }
 
+// ====== Table Logics ======
+
 // Draw lesson bar
 function renderLessons() {
   const tbody = document.getElementById("lesson-tbody");
   tbody.innerHTML = "";
 
+  // Find lessons in current page
+  const start = (currentPage - 1) * rowsPerPage;
+  const end = start + rowsPerPage;
+  const pageItems = lessons.slice(start, end);
+
   // Create lesson bar
-  lessons.forEach((lesson, index) => {
+  pageItems.forEach((lesson, index) => {
     const tr = document.createElement("tr");
 
     tr.innerHTML = `
@@ -38,6 +52,8 @@ function renderLessons() {
 
   // Update lesson count
   updateLessonCount();
+  updateRowRange();
+  updateFooterButtons();
 }
 
 // Bind button actions
@@ -57,5 +73,18 @@ function bindActions(row, lesson) {
   };
 }
 
+// ====== Footer Logics ======
+
+function updateRowRange() {
+  const total = lessons.length;
+  const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
+  const end = Math.min(currentPage * rowsPerPage, total);
+
+  document.getElementById("row-range").textContent =
+    `${start}–${end} of ${total}`;
+}
+
+
 // ====== Execution ======
+
 renderLessons();
