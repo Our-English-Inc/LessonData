@@ -1,8 +1,15 @@
+// Update lesson count in Head
+function updateLessonCount() {
+  const countEl = document.getElementById("lesson-count");
+  countEl.textContent = `(${lessons.length})`;
+}
+
 // Draw lesson bar
 function renderLessons() {
   const tbody = document.getElementById("lesson-tbody");
   tbody.innerHTML = "";
 
+  // Create lesson bar
   lessons.forEach((lesson, index) => {
     const tr = document.createElement("tr");
 
@@ -28,6 +35,9 @@ function renderLessons() {
     bindActions(tr, lesson);
     tbody.appendChild(tr);
   });
+
+  // Update lesson count
+  updateLessonCount();
 }
 
 // Bind button actions
