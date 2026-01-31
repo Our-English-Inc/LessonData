@@ -83,9 +83,11 @@
             type="button"
             id="toggle-password"
             class="toggle-password"
-            title="Show password"
+            aria-label="Toggle password visibility"
+            data-visible="false"
           >
-            👁
+            <span class="icon-eye">👁</span>
+            <span class="icon-eye-off">⌣</span>
           </button>
         </div>
         <div id="modal-password-error" class="modal-error hidden">

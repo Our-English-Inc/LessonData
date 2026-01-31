@@ -188,11 +188,15 @@ function openActionModal({ title, desc, onConfirm }) {
   const confirmBtn = document.getElementById("modal-confirm");
   const errorEl = document.getElementById("modal-password-error");
   
-
   document.getElementById("modal-title").textContent = title;
   document.getElementById("modal-desc").textContent = desc;
 
+  // Reset password zone
   passwordInput.value = "";
+  passwordInput.type = "password";
+  const toggleBtn = document.getElementById("toggle-password");
+  toggleBtn.setAttribute("data-visible", "false");
+
   awareCheckbox.checked = false;
   confirmBtn.disabled = true;
 
@@ -231,7 +235,12 @@ document.getElementById("modal-confirm").onclick = () => {
 
 document.getElementById("toggle-password").onclick = () => {
   const input = document.getElementById("modal-password");
-  input.type = input.type === "password" ? "text" : "password";
+  const btn = document.getElementById("toggle-password");
+
+  const isVisible = input.type === "text";
+
+  input.type = isVisible ? "password" : "text";
+  btn.setAttribute("data-visible", String(!isVisible));
 };
 
 //#endregion

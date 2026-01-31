@@ -256,7 +256,7 @@
 
 .modal-card {
   position: relative;
-  width: 360px;
+  width: 480px;
   margin: 20vh auto;
   background: white;
   border-radius: 8px;
@@ -265,14 +265,16 @@
 }
 
 .modal-card h3 {
-  margin: 0 0 8px;
-  font-size: 16px;
+  margin: 0 0 12px;
+  font-size: 24px;
+  font-size: 600;
 }
 
 .modal-desc {
-  font-size: 13px;
+  font-size: 16px;
+  line-height: 1.5;
   color: #555;
-  margin-bottom: 12px;
+  margin-bottom: 20px;
 }
 
 .modal-card input[type="password"] {
@@ -282,11 +284,10 @@
 }
 
 .modal-awareness {
-  display: flex;
-  gap: 6px;
-  font-size: 12px;
-  color: #444;
-  margin-bottom: 14px;
+  font-size: 14px;
+  line-height: 1.4;
+  margin: 18px auto 24px;
+  max-width: 360px;
 }
 
 .modal-actions {
@@ -296,13 +297,16 @@
 }
 
 .modal-actions button {
-  padding: 6px 12px;
+  min-width: 96px;
+  height: 36px;
+  font-size: 14px;
 }
 
 .modal-actions .danger {
   background: #e74c3c;
   color: white;
   border: none;
+  font-size: 14px;
 }
 
 .modal-actions .danger:disabled {
@@ -323,27 +327,68 @@
 
 .password-wrapper {
   position: relative;
+  width: 100%;
+  max-width: 420px;
+  margin: 0 auto 16px;
 }
 
 .password-wrapper input {
   width: 100%;
-  padding-right: 36px;
+  height: 44px;
+  font-size: 15px;
+  padding: 0 44px 0 44px;
+  border-radius: 8px;
+  border: 1px solid #ccc;
+  box-sizing: border-box;
 }
 
 .toggle-password {
   position: absolute;
   top: 50%;
-  right: 8px;
+  right: 12px;
   transform: translateY(-50%);
+
+  width: 20px;
+  height: 20px;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
   border: none;
   background: none;
+  padding: 0;
   cursor: pointer;
-  font-size: 14px;
-  opacity: 0.6;
+
+  opacity: 0.5;
 }
 
 .toggle-password:hover {
   opacity: 1;
+}
+
+.toggle-password span {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.toggle-password .icon-eye {
+  display: none;
+}
+
+.toggle-password .icon-eye-off {
+  display: flex;
+}
+
+.toggle-password[data-visible="true"] .icon-eye {
+  display: flex;
+}
+
+.toggle-password[data-visible="true"] .icon-eye-off {
+  display: none;
 }
 
 /*#endregion */
