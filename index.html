@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     
-    <title>Games</title>
+    <title>Our English - Games Data Management</title>
     
     <!-- ====== Styles ====== -->
     <link rel="stylesheet" href="indexStyle.css" />
@@ -15,6 +15,10 @@
     <div id="header">
       <div id="header-title">
         <h2>Games <span id="game-count">(0)</span></h2>
+      </div>
+      
+      <div id="header-actions">
+        <button id="panel-toggle-btn"></button>
       </div>
     </div>
     
@@ -125,6 +129,32 @@
     </div>
 
     <!-- ====== Scripts ====== -->
+    <script>
+      // Toggle panel button
+      const panel = new URLSearchParams(location.search).get("panel") || "games";
+      const togglePanelBtn = document.getElementById("panel-toggle-btn");
+      const pageTitle = document.getElementById("page-title");
+      const itemCount = document.getElementById("item-count");
+
+      if (panel === "games") {
+        togglePanelBtn.textContent = "Admin Panel";
+        togglePanelBtn.onclick = () => {
+          location.href = "index.html?panel=admin";
+        };
+        document.title = "Our English - Game Data Management";
+        pageTitle.firstChild.textContent = "Games ";
+        itemCount.textContent = `(${games.length})`;
+      } else {
+        togglePanelBtn.textContent = "Games";
+        togglePanelBtn.onclick = () => {
+          location.href = "index.html?panel=games";
+        };
+        document.title = "Our English - Admin Management";
+        pageTitle.firstChild.textContent = "Admins ";
+        itemCount.textContent = `(${admins.length})`;
+      }
+    </script>
+
     <script src="gamesPanel/games.js"></script>
     <script src="gamesPanel/gameManagement.js"></script>
     <script src="adminPanel/admins.js"></script>
