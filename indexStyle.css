@@ -23,6 +23,10 @@ body {
   color: var(--text-main);
 }
 
+.hidden {
+  display: none;
+}
+
 /*#endregion */
 
 /*#region ====== Header ====== */

@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
     
-    <title>Our English - Games Data Management</title>
+    <title>Our English - Games Management</title>
     
     <!-- ====== Styles ====== -->
     <link rel="stylesheet" href="indexStyle.css" />
@@ -14,7 +14,8 @@
     <!-- Head -->
     <div id="header">
       <h2 id="header-title">
-        Games <span id="item-count">(0)</span>
+        <span id="header-title-text">Games</span>
+        <span id="item-count">(0)</span>
       </h2>
       
       <div id="header-actions">
@@ -24,7 +25,7 @@
     
     <!-- Table -->
     <table id="item-table">
-      <thead>
+      <thead id="thead-games">
         <tr>
           <th>#</th>
           <th>ACTIONS</th>
@@ -34,6 +35,19 @@
           <th>LEVELS</th>
           <th>LAST UPDATED</th>
           <th>UPDATED BY</th>
+        </tr>
+      </thead>
+
+      <thead id="thead-admins" class="hidden">
+        <tr>
+          <th>#</th>
+          <th>ACTIONS</th>
+          <th>USERNAME</th>
+          <th>FIRSTNAME</th>
+          <th>LASTNAME</th>
+          <th>E-MAIL</th>
+          <th>ROLE</th>
+          <th>ACTIVE</th>
         </tr>
       </thead>
       
@@ -130,9 +144,9 @@
 
     <!-- ====== Scripts ====== -->
     <script src="gamesPanel/games.js"></script>
-    <script src="gamesPanel/gameManagement.js"></script>
-    <script src="adminPanel/admins.js"></script>
-    <script src="adminPanel/adminManagement.js"></script>
+    <script src="gamesPanel/gamesManagement.js"></script>
+    <script src="adminsPanel/admins.js"></script>
+    <script src="adminsPanel/adminsManagement.js"></script>
     
     <script>
       // Variables
@@ -144,25 +158,32 @@
       // Toggle panel button
       const panel = new URLSearchParams(location.search).get("panel") || "games";
       const togglePanelBtn = document.getElementById("panel-toggle-btn");
-      const pageTitle = document.getElementById("header-title");
+      const headerTitle = document.getElementById("header-title-text");
       const itemCount = document.getElementById("item-count");
+      const theadGames = document.getElementById("thead-games");
+      const theadAdmin = document.getElementById("thead-admins");
+
 
       if (panel === "games") {
-        togglePanelBtn.textContent = "Admin Panel";
+        togglePanelBtn.textContent = "Admins Management";
         togglePanelBtn.onclick = () => {
-          location.href = "index.html?panel=admin";
+          location.href = "index.html?panel=admins";
         };
-        document.title = "Our English - Game Data Management";
-        pageTitle.firstChild.textContent = "Games ";
+        document.title = "Our English - Games Management";
+        headerTitle.textContent = "Games ";
         itemCount.textContent = `(${games.length})`;
+        theadGames.classList.remove("hidden");
+        theadAdmin.classList.add("hidden");
       } else {
-        togglePanelBtn.textContent = "Games";
+        togglePanelBtn.textContent = "Games Management";
         togglePanelBtn.onclick = () => {
           location.href = "index.html?panel=games";
         };
-        document.title = "Our English - Admin Management";
-        pageTitle.firstChild.textContent = "Admins ";
+        document.title = "Our English - Admins Management";
+        headerTitle.textContent = "Admins ";
         itemCount.textContent = `(${admins.length})`;
+        theadGames.classList.add("hidden");
+        theadAdmin.classList.remove("hidden");
       }
     </script>
   </body>

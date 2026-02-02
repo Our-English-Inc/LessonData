@@ -221,4 +221,4 @@ document.getElementById("modal-confirm").onclick = () => {
 // ====== Init ======
 
 panel = new URLSearchParams(location.search).get("panel") || "games";
-if (panel === "admin") draw();
+if (panel === "admins") draw();
