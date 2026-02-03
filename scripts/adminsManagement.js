@@ -4,10 +4,8 @@
   const ADMIN_ROLES = ["Admin", "QA", "Guest"];
 
   let admins = [];
-
-  let currentPage = 1;
-  let rowsPerPage = 10;
   let pendingAction = null;
+  let footer = null;
 
   //#endregion
 
@@ -146,59 +144,13 @@
     };
   }
 
-  // ====== Footer / Pagination ======
-
-  function updateRowRange() {
-    const total = admins.length;
-    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
-    const end = Math.min(currentPage * rowsPerPage, total);
-
-    document.getElementById("row-range").textContent =
-      `${start}–${end} of ${total}`;
-  }
-
-  function updateFooterButtons() {
-    const totalPages = Math.ceil(admins.length / rowsPerPage);
-
-    document.getElementById("first-page").disabled = currentPage === 1;
-    document.getElementById("prev-page").disabled = currentPage === 1;
-    document.getElementById("next-page").disabled = currentPage === totalPages;
-    document.getElementById("last-page").disabled = currentPage === totalPages;
-  }
-
-  document.getElementById("first-page").onclick = () => {
-    currentPage = 1;
-    draw();
-  };
-
-  document.getElementById("prev-page").onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      draw();
-    }
-  };
-
-  document.getElementById("next-page").onclick = () => {
-    const totalPages = Math.ceil(admins.length / rowsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      draw();
-    }
-  };
-
-  document.getElementById("last-page").onclick = () => {
-    currentPage = Math.ceil(admins.length / rowsPerPage);
-    draw();
-  };
-
   // ====== Draw ======
 
-  function draw() {
+  function drawAdmins() {
     const tbody = document.getElementById("item-tbody");
     tbody.innerHTML = "";
 
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+    const [start, end] = footer.getPageSlice();
     const pageItems = admins.slice(start, end);
 
     pageItems.forEach((admin, index) => {
@@ -209,8 +161,6 @@
     });
 
     updateAdminCount();
-    updateRowRange();
-    updateFooterButtons();
   }
 
   // ====== Modal ======
@@ -272,7 +222,12 @@
     async function initAdminsPage() {
       admins = await loadAdminsFromCSV();
       setupIndexUI({ adminsCount: admins.length });
-      draw();
+
+      footer = createFooterController({
+        onPageChange: drawAdmins
+      });
+
+      footer.setTotalItems(admins.length);
     }
 
     initAdminsPage();

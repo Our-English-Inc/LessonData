@@ -2,10 +2,8 @@
   //#region ====== Variables ======
 
   let games = [];
-
-  let currentPage = 1;
-  let rowsPerPage = 10;
   let pendingAction = null;
+  let footer = null;
 
   //#endregion
 
@@ -106,62 +104,14 @@
 
   //#endregion
 
-  //#region ====== Footer Logics ======
-
-  function updateRowRange() {
-    const total = games.length;
-    const start = total === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
-    const end = Math.min(currentPage * rowsPerPage, total);
-
-    document.getElementById("row-range").textContent =
-      `${start}–${end} of ${total}`;
-  }
-
-  function updateFooterButtons() {
-    const totalPages = Math.ceil(games.length / rowsPerPage);
-
-    document.getElementById("first-page").disabled = currentPage === 1;
-    document.getElementById("prev-page").disabled = currentPage === 1;
-    document.getElementById("next-page").disabled = currentPage === totalPages;
-    document.getElementById("last-page").disabled = currentPage === totalPages;
-  }
-
-  document.getElementById("first-page").onclick = () => {
-    currentPage = 1;
-    draw();
-  };
-
-  document.getElementById("prev-page").onclick = () => {
-    if (currentPage > 1) {
-      currentPage--;
-      draw();
-    }
-  };
-
-  document.getElementById("next-page").onclick = () => {
-    const totalPages = Math.ceil(games.length / rowsPerPage);
-    if (currentPage < totalPages) {
-      currentPage++;
-      draw();
-    }
-  };
-
-  document.getElementById("last-page").onclick = () => {
-    currentPage = Math.ceil(games.length / rowsPerPage);
-    draw();
-  };
-
-  //#endregion
-
   // ====== Draw ======
 
-  function draw() {
+  function drawGames() {
     const tbody = document.getElementById("item-tbody");
     tbody.innerHTML = "";
 
     // Find game rows in current page
-    const start = (currentPage - 1) * rowsPerPage;
-    const end = start + rowsPerPage;
+    const [start, end] = footer.getPageSlice();
     const pageItems = games.slice(start, end);
 
     // Create game rows
@@ -212,8 +162,6 @@
 
     // Update UI
     updateGameCount();
-    updateRowRange();
-    updateFooterButtons();
   }
 
   //#region ====== Action Confirmation Models ======
@@ -322,7 +270,12 @@
     async function initGamesPage() {
       games = await loadGamesFromCSV();
       setupIndexUI({ gamesCount: games.length });
-      draw();
+
+      footer = createFooterController({
+        onPageChange: drawGames
+      });
+
+      footer.setTotalItems(games.length);
     }
 
     initGamesPage();
