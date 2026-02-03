@@ -1,4 +1,5 @@
-// ====== Panel Constants ======
+//#region ====== Variables ======
+
 const PANEL = {
   GAMES: "games",
   ADMINS: "admins"
@@ -7,12 +8,16 @@ const ADMIN_PASSWORD = "admin123";
 
 let currentPanel = null;
 
-// ====== Panel Utils ======
+//#endregion
+
+//#region ====== Panel Switch ======
+
+// Detect current panel
 function getPanel() {
   return new URLSearchParams(location.search).get("panel") || PANEL.GAMES;
 }
 
-// ====== Header & Layout ======
+// Update content according to selected panel
 function setupIndexUI({ gamesCount = 0, adminsCount = 0 }) {
   const panel = getPanel();
 
@@ -56,3 +61,5 @@ function setupIndexUI({ gamesCount = 0, adminsCount = 0 }) {
 
   return panel;
 }
+
+//#endregion

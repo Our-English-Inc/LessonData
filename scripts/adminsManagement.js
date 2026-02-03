@@ -1,5 +1,5 @@
 (() => {
-  // ====== Variables ======
+  //#region ====== Variables ======
 
   const ADMIN_ROLES = ["Admin", "QA", "Guest"];
 
@@ -9,7 +9,9 @@
   let rowsPerPage = 10;
   let pendingAction = null;
 
-  // ===== CSV Loader =====
+  //#endregion
+
+  //#region ====== CSV ======
 
   async function loadAdminsFromCSV() {
     const res = await fetch("csv/AdminData.csv");
@@ -43,13 +45,16 @@
     });
   }
 
+  //#endregion
 
-  // ====== Header ======
+  //#region ====== Header ======
 
   function updateAdminCount() {
     const countEl = document.getElementById("item-count");
     countEl.textContent = `(${admins.length})`;
   }
+
+  //#endregion
 
   // ====== Row Render ======
 

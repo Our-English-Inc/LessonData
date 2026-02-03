@@ -1,5 +1,5 @@
 (() => {
-  // ====== Variables ======
+  //#region ====== Variables ======
 
   let games = [];
 
@@ -7,7 +7,9 @@
   let rowsPerPage = 10;
   let pendingAction = null;
 
-  // ====== CSV ======
+  //#endregion
+
+  //#region ====== CSV ======
 
   async function loadGamesFromCSV() {
     const res = await fetch("csv/GameData.csv");
@@ -41,9 +43,10 @@
     });
   }
 
-  //#region ====== Header Logics ======
+  //#endregion
 
-  // Update game count in Head
+  //#region ====== Header ======
+
   function updateGameCount() {
     const countEl = document.getElementById("item-count");
     countEl.textContent = `(${games.length})`;
