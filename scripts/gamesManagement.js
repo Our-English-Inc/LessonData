@@ -52,11 +52,52 @@
 
   //#endregion
 
-  //#region ====== Table Logics ======
+  //#region ====== Table ======
 
-  // Bind button actions
-  function bindActions(row, game) {
-    // Edit
+  // Create row for each game
+  function renderGamesRow(game, index){
+    return `
+      <td>${index + 1}</td>
+
+      <!-- Actions -->
+      <td>
+        <div class="actions">
+          <button class="action-btn edit" title="Edit">✏️</button>
+          <button class="action-btn restore" title="Restore">🔄</button>
+          <button class="action-btn delete" title="Delete">🗑️</button>
+        </div>
+      </td>
+
+      <!-- Version -->
+      <td>${game.number}</td>
+
+      <!-- Title -->
+      <td>${game.title}</td>
+
+      <!-- Active -->
+      <td>
+        <label class="switch-yn">
+          <input type="checkbox" ${game.active ? "checked" : ""}>
+          <span class="switch-track">
+            <span class="switch-label yes">YES</span>
+            <span class="switch-label no">NO</span>
+            <span class="switch-thumb"></span>
+          </span>
+        </label>
+      </td>
+
+      <!-- Levels -->
+      <td>${game.levels}</td>
+
+      <!-- Updated -->
+      <td>${game.updatedAt}</td>
+      <td>${game.updatedBy}</td>
+    `;
+  }
+
+  // Bind actions with interactctive UI components
+  function bindGamesInteractiveUI(row, game) {
+    // "Edit" Button
     row.querySelector(".edit").onclick = () => {
       openActionModal({
         title: "Modify Game",
@@ -67,7 +108,7 @@
       });
     };
 
-    // Restore
+    // "Restore" Button
     row.querySelector(".restore").onclick = () => {
       openActionModal({
         title: "Restore Latest Safe Version",
@@ -81,7 +122,7 @@
       });
     };
 
-    // Delete
+    // "Delete" Button
     row.querySelector(".delete").onclick = () => {
       openActionModal({
         title: "Delete Game",
@@ -92,7 +133,7 @@
       });
     };
 
-    // Switch active/inactive
+    // "Active" Switch
     const toggle = row.querySelector('.switch-yn input');
     if (toggle) {
       toggle.onchange = () => {
@@ -102,10 +143,7 @@
     }
   }
 
-  //#endregion
-
-  // ====== Draw ======
-
+  // Draw 
   function drawGames() {
     const tbody = document.getElementById("item-tbody");
     tbody.innerHTML = "";
@@ -117,52 +155,16 @@
     // Create game rows
     pageItems.forEach((game, index) => {
       const tr = document.createElement("tr");
-
-      tr.innerHTML = `
-        <td>${start + index + 1}</td>
-
-        <!-- Actions -->
-        <td>
-          <div class="actions">
-            <button class="action-btn edit" title="Edit">✏️</button>
-            <button class="action-btn restore" title="Restore">🔄</button>
-            <button class="action-btn delete" title="Delete">🗑️</button>
-          </div>
-        </td>
-
-        <!-- Version -->
-        <td>${game.number}</td>
-
-        <!-- Title -->
-        <td>${game.title}</td>
-
-        <!-- Active -->
-        <td>
-          <label class="switch-yn">
-            <input type="checkbox" ${game.active ? "checked" : ""}>
-            <span class="switch-track">
-              <span class="switch-label yes">YES</span>
-              <span class="switch-label no">NO</span>
-              <span class="switch-thumb"></span>
-            </span>
-          </label>
-        </td>
-
-        <!-- Levels -->
-        <td>${game.levels}</td>
-
-        <!-- Updated -->
-        <td>${game.updatedAt}</td>
-        <td>${game.updatedBy}</td>
-      `;
-
-      bindActions(tr, game);
+      tr.innerHTML = renderGamesRow(game, start + index);
+      bindGamesInteractiveUI(tr, game);
       tbody.appendChild(tr); 
     })
 
     // Update UI
     updateGameCount();
   }
+
+  //#endregion
 
   //#region ====== Action Confirmation Models ======
 

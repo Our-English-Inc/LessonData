@@ -54,8 +54,9 @@
 
   //#endregion
 
-  // ====== Row Render ======
+  //#region ====== Table ======
 
+  // Create drop-down list for Role
   function renderRoleSelect(admin) {
     return `
       <select class="role-select">
@@ -68,6 +69,7 @@
     `;
   }
 
+  // Create row for each admin account
   function renderAdminRow(admin, index) {
     return `
       <td>${index + 1}</td>
@@ -104,10 +106,9 @@
     `;
   }
 
-  // ====== Bind Actions ======
-
-  function bindAdminActions(row, admin) {
-    // Edit
+  // Bind actions with interactctive UI components
+  function bindInteractiveUI(row, admin) {
+    // "Edit" Button
     row.querySelector(".edit").onclick = () => {
       openActionModal({
         title: "Modify Admin",
@@ -118,7 +119,7 @@
       });
     };
 
-    // Delete
+    // "Delete" Button
     row.querySelector(".delete").onclick = () => {
       openActionModal({
         title: "Delete Admin",
@@ -129,14 +130,14 @@
       });
     };
 
-    // Active switch
+    // "Active" Switch
     const toggle = row.querySelector(".switch-yn input");
     toggle.onchange = () => {
       admin.active = toggle.checked;
       console.log("Admin active changed:", admin.id, admin.active);
     };
 
-    // Role select
+    // "Role" Drop-down List
     const roleSelect = row.querySelector(".role-select");
     roleSelect.onchange = () => {
       admin.role = roleSelect.value;
@@ -144,8 +145,7 @@
     };
   }
 
-  // ====== Draw ======
-
+  // Draw
   function drawAdmins() {
     const tbody = document.getElementById("item-tbody");
     tbody.innerHTML = "";
@@ -156,12 +156,14 @@
     pageItems.forEach((admin, index) => {
       const tr = document.createElement("tr");
       tr.innerHTML = renderAdminRow(admin, start + index);
-      bindAdminActions(tr, admin);
+      bindInteractiveUI(tr, admin);
       tbody.appendChild(tr);
     });
 
     updateAdminCount();
   }
+
+  //#endregion
 
   // ====== Modal ======
 
