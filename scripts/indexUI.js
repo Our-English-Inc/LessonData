@@ -7,6 +7,7 @@ const PANEL = {
 const ADMIN_PASSWORD = "admin123";
 
 let currentPanel = null;
+let pendingAction = null;
 
 //#endregion
 
@@ -136,3 +137,53 @@ function createFooterController({ onPageChange }) {
 
 //#endregion
 
+//#region ====== Action Confirmation Modal ======
+
+function openActionModal({ title, desc, onConfirm }) {
+    const modal = document.getElementById("action-modal");
+    const passwordInput = document.getElementById("modal-password");
+    const awareCheckbox = document.getElementById("modal-aware");
+    const confirmBtn = document.getElementById("modal-confirm");
+    const errorEl = document.getElementById("modal-password-error");
+
+    document.getElementById("modal-title").textContent = title;
+    document.getElementById("modal-desc").textContent = desc;
+
+    passwordInput.value = "";
+    awareCheckbox.checked = false;
+    confirmBtn.disabled = true;
+    errorEl.classList.add("hidden");
+
+    modal.classList.remove("hidden");
+
+    const updateConfirmState = () => {
+      confirmBtn.disabled = !(
+        passwordInput.value.length > 0 && awareCheckbox.checked
+      );
+      errorEl.classList.add("hidden");
+    };
+
+    passwordInput.oninput = updateConfirmState;
+    awareCheckbox.onchange = updateConfirmState;
+
+    pendingAction = onConfirm;
+  }
+
+  document.getElementById("modal-cancel").onclick = () => {
+    document.getElementById("action-modal").classList.add("hidden");
+  };
+
+  document.getElementById("modal-confirm").onclick = () => {
+    const passwordInput = document.getElementById("modal-password");
+    const errorEl = document.getElementById("modal-password-error");
+
+    if (passwordInput.value !== ADMIN_PASSWORD) {
+      errorEl.classList.remove("hidden");
+      return;
+    }
+
+    document.getElementById("action-modal").classList.add("hidden");
+    if (pendingAction) pendingAction();
+  };
+
+  //#endregion

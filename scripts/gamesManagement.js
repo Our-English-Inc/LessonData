@@ -2,7 +2,6 @@
   //#region ====== Variables ======
 
   let games = [];
-  let pendingAction = null;
   let footer = null;
 
   //#endregion
@@ -166,103 +165,7 @@
 
   //#endregion
 
-  //#region ====== Action Confirmation Models ======
-
-  // Open a popup window when click on action buttons
-  function openActionModal({ title, desc, onConfirm }) {
-    const modal = document.getElementById("action-modal");
-    const passwordInput = document.getElementById("modal-password");
-    const awareCheckbox = document.getElementById("modal-aware");
-    const confirmBtn = document.getElementById("modal-confirm");
-    const errorEl = document.getElementById("modal-password-error");
-    const passwordText = document.getElementById("modal-password-text");
-    
-    document.getElementById("modal-title").textContent = title;
-    document.getElementById("modal-desc").textContent = desc;
-
-    // Reset password zone
-    passwordInput.value = "";
-    passwordText.value = "";
-    passwordInput.classList.remove("is-hidden");
-    passwordText.classList.add("is-hidden");
-    passwordInput.type = "password";
-    const toggleBtn = document.getElementById("toggle-password");
-    toggleBtn.setAttribute("data-visible", "false");
-
-    awareCheckbox.checked = false;
-    confirmBtn.disabled = true;
-
-    modal.classList.remove("hidden");
-    errorEl.classList.add("hidden");
-
-    const updateConfirmState = () => {
-      const hasPassword = passwordInput.value.length > 0;
-      const awareOk = awareCheckbox.checked;
-      confirmBtn.disabled = !(hasPassword && awareOk);
-      errorEl.classList.add("hidden");
-    };
-
-    passwordInput.oninput = updateConfirmState;
-    awareCheckbox.onchange = updateConfirmState;
-
-    pendingAction = onConfirm;
-  }
-
-  document.getElementById("modal-cancel").onclick = () => {
-    document.getElementById("action-modal").classList.add("hidden");
-  };
-
-  document.getElementById("modal-confirm").onclick = () => {
-    const passwordInput = document.getElementById("modal-password");
-    const errorEl = document.getElementById("modal-password-error");
-
-    if (passwordInput.value !== ADMIN_PASSWORD) {
-      errorEl.classList.remove("hidden");
-      return;
-    }
-
-    document.getElementById("action-modal").classList.add("hidden");
-    if (pendingAction) pendingAction();
-  };
-
-  document.getElementById("toggle-password").onclick = () => {
-    const hidden = document.getElementById("modal-password");
-    const text = document.getElementById("modal-password-text");
-    const btn = document.getElementById("toggle-password");
-
-    const showing = btn.getAttribute("data-visible") === "true";
-
-    if (showing) {
-      // switch to hidden (password)
-      text.classList.add("is-hidden");
-      hidden.classList.remove("is-hidden");
-      hidden.focus();
-      hidden.selectionStart = hidden.selectionEnd = hidden.value.length;
-      btn.setAttribute("data-visible", "false");
-    } else {
-      // switch to visible (text)
-      hidden.classList.add("is-hidden");
-      text.classList.remove("is-hidden");
-      text.focus();
-      text.selectionStart = text.selectionEnd = text.value.length;
-      btn.setAttribute("data-visible", "true");
-    }
-  };
-
-  const pwHidden = document.getElementById("modal-password");
-  const pwText = document.getElementById("modal-password-text");
-
-  // Keep values in sync
-  pwHidden.addEventListener("input", () => {
-    pwText.value = pwHidden.value;
-  });
-  pwText.addEventListener("input", () => {
-    pwHidden.value = pwText.value;
-  });
-
-  //#endregion
-
-  // ====== Execution ======
+  // ====== Init ======
 
   (() => {
     const panel = getPanel();
