@@ -273,3 +273,96 @@ function closeEditModal() {
 }
 
 //#endregion
+
+//#region ====== Replace CSC ====== 
+
+function downloadCSV(filename, csvText) {
+  const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = filename;
+  document.body.appendChild(a);
+  a.click();
+
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+}
+
+function toCSV(headers, rows) {
+  const headerLine = headers.join(",");
+
+  const bodyLines = rows.map(row =>
+    headers.map(h => {
+      const value = row[h] ?? "";
+      if (typeof value === "string" && value.includes(",")) {
+        return `"${value.replace(/"/g, '""')}"`;
+      }
+      return value;
+    }).join(",")
+  );
+
+  return [headerLine, ...bodyLines].join("\n");
+}
+
+// For Games Panel
+async function saveGamesToServer(games) {
+  const headers = [
+    "id",
+    "version",
+    "title",
+    "active",
+    "levels"
+  ];
+
+  const rows = games.map(g => ({
+    id: g.id,
+    version: g.version,
+    title: g.title,
+    active: g.active ? "true" : "false",
+    levels: g.levels,
+  }));
+
+  const csv = toCSV(headers, rows);
+
+  const res = await fetch("http://localhost:3000/api/save-games", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ csv })
+  });
+
+  if (!res.ok) {
+    throw new Error("Failed to save GameData.csv");
+  }
+}
+
+
+// For Admins Panel
+function exportAdminsCSV(admins) {
+  const headers = [
+    "id",
+    "username",
+    "firstname",
+    "lastname",
+    "email",
+    "role",
+    "active"
+  ];
+
+  const rows = admins.map(a => ({
+    id: a.id,
+    username: a.username,
+    firstname: a.firstname,
+    lastname: a.lastname,
+    email: a.email,
+    role: a.role,
+    active: a.active ? "true" : "false"
+  }));
+
+  const csv = toCSV(headers, rows);
+  downloadCSV("AdminData.csv", csv);
+}
+
+
+//#endregion

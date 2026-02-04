@@ -109,12 +109,16 @@
               { key: "version", label: "Version" },
               { key: "title", label: "Title" },
               { key: "active", label: "Active", type: "checkbox" },
-              { key: "levels", label: "Levels", type: "number" },
-              { key: "updatedAt", label: "Last Updated"},
-              { key: "updatedBy", label: "Updated By"},
+              { key: "levels", label: "Levels", type: "number" }
             ],
-            onSave: () => {
-              drawGames();
+            onSave: async () => {
+              try {
+                await saveGamesToServer(games);
+                drawGames();
+                showFooterMessage("✓ Saved to CSV");
+              } catch (e) {
+                alert("Save failed. Check server.");
+              }
             }
           });
         }

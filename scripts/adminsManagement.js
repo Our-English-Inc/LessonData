@@ -126,6 +126,7 @@
             ],
             onSave: () => {
               drawAdmins();
+              exportAdminsCSV(admins);
             }
           });
         }
