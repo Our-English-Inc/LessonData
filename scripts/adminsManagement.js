@@ -79,6 +79,7 @@
       <td>
         <div class="actions">
           <button class="action-btn edit" title="Edit">✏️</button>
+          <button class="action-btn restore" title="Restore">🔄</button>
           <button class="action-btn delete" title="Delete">🗑️</button>
         </div>
       </td>
@@ -136,6 +137,21 @@
               }
             }
           });
+        }
+      });
+    };
+
+    // "Restore" Button
+    row.querySelector(".restore").onclick = () => {
+      openActionModal({
+        title: "Restore Latest Safe Version",
+        desc: "This will restore the admin account to the most recent safe version. Any unsaved changes will be lost. This action takes effect immediately.",
+        onConfirm: async () => {
+          try {
+            await restoreCSV("AdminData");
+          } catch (e) {
+            alert("Restore failed. Check server.");
+          }
         }
       });
     };

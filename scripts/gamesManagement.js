@@ -132,11 +132,12 @@
       openActionModal({
         title: "Restore Latest Safe Version",
         desc: "This will restore the game to the most recent safe version. Any unsaved changes will be lost. This action takes effect immediately.",
-        onConfirm: () => {
-          console.log("Restore latest safe version:", game.id);
-
-          // TODO: Get file
-          // restoreGameToLatestSafeVersion(game.id);
+        onConfirm: async () => {
+          try {
+            await restoreCSV("GameData");
+          } catch (e) {
+            alert("Restore failed. Check server.");
+          }
         }
       });
     };
