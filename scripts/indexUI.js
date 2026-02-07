@@ -274,7 +274,7 @@ function closeEditModal() {
 
 //#endregion
 
-//#region ====== Replace CSC ====== 
+//#region ====== Replace CSV ====== 
 
 function downloadCSV(filename, csvText) {
   const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
@@ -375,6 +375,27 @@ async function saveAdminsToServer(admins) {
   if (!res.ok) {
     throw new Error("Failed to save AdminData.csv");
   }
+}
+
+// Restore Safe version
+async function restoreCSV(target) {
+  const res = await fetch(
+    "https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net/api/restoreSafeCSV",
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ target })
+    }
+  );
+
+  if (!res.ok) {
+    alert("Restore failed");
+    return;
+  }
+
+  location.reload();
 }
 
 //#endregion
