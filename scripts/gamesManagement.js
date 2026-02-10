@@ -123,23 +123,48 @@ console.log("panelKeySet:", Array.from(panelKeySet));
     return html;
   }
 
+  async function getEditorFieldsFromRules(game) {
+    const rows = await loadCSV("csv/GameElementRule.csv?t=" + Date.now());
+
+    return rows
+      .filter(r => {
+        if (r.inEditor !== "true") return false;
+
+        const key = r.key;
+
+        if (key in game) return true;
+
+        return false;
+      })
+      .map(r => {
+        const field = {
+          key: r.key,
+          label: r.label
+        };
+
+        if (r.key === "active") field.type = "checkbox";
+        if (r.key === "levels") field.type = "number";
+
+        return field;
+      });
+  }
+
+
+
   // Bind actions with interactctive UI components
   function bindGamesInteractiveUI(row, game) {
     // "Edit" Button
-    row.querySelector(".edit").onclick = () => {
+    row.querySelector(".edit").onclick = async () => {
       openActionModal({
         title: "Modify Game",
         desc: "You are about to modify this game. This change will take effect immediately.",
-        onConfirm: () => {
+        onConfirm: async () => {
+          const fields = await getEditorFieldsFromRules(game);
+
           openEditModal({
-            title: `Edit #${game.title}`,
+            title: `Edit ${game.title}`,
             data: game,
-            fields: [
-              { key: "version", label: "Version" },
-              { key: "title", label: "Title" },
-              { key: "active", label: "Active", type: "checkbox" },
-              { key: "levels", label: "Levels", type: "number" }
-            ],
+            fields,
             onSave: async () => {
               try {
                 await saveGamesToServer(games);
