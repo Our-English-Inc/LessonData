@@ -1,14 +1,57 @@
-id,version,title,active,levels
-1,v1.0.999999,Word Splash,true,6
-2,v1.0.2,Sentence Scramble,true,6
-3,v1.0.0,Bubble Pop,true,6
-4,v1.0.0,Placeholder 1,false,1
-5,v1.0.0,Placeholder 2,false,1
-6,v1.0.0,Placeholder 3,false,1
-7,v1.0.0,Placeholder 4,false,1
-8,v1.0.0,Placeholder 5,false,1
-9,v1.0.0,Placeholder 6,false,1
-10,v1.0.0,Placeholder 7,false,1
-11,v1.0.0,Placeholder 8,false,1
-12,v1.0.0,Placeholder 9,false,1
-13,v1.0.0,Placeholder 10,false,1
+id,element,level,value
+1,version,,v1.0.0
+1,title,,Word Splash
+1,active,,true
+1,levels,,6
+1,updatedAt,,1/1/2026
+1,updatedBy,,testuser
+1,words,1,some words here
+1,words,2,some words here
+1,words,3,some words here
+1,words,4,some words here
+1,words,5,some words here
+1,words,6,some words here
+1,lightning_timer,,90
+1,max_wrong,,3
+2,version,,v1.0.0
+2,title,,Sentence Scramble
+2,active,,true
+2,levels,,6
+2,updatedAt,,1/1/2026
+2,updatedBy,,testuser
+2,sentences,1,some sentences here
+2,sentences,2,some sentences here
+2,sentences,3,some sentences here
+2,sentences,4,some sentences here
+2,sentences,5,some sentences here
+2,sentences,6,some sentences here
+2,timer,,30
+2,block_highlight,,true
+3,version,,v1.0.0
+3,title,,Bubble Pop
+3,active,,true
+3,levels,,6
+3,updatedAt,,1/1/2026
+3,updatedBy,,testuser
+3,words,1,some words here
+3,words,2,some words here
+3,words,3,some words here
+3,words,4,some words here
+3,words,5,some words here
+3,words,6,some words here
+3,lightning_timer,,90
+3,max_wrong,,3
+4,version,,v1.0.0
+4,title,,Word Scramble
+4,active,,true
+4,levels,,6
+4,updatedAt,,1/1/2026
+4,updatedBy,,testuser
+4,words,1,some words here
+4,words,2,some words here
+4,words,3,some words here
+4,words,4,some words here
+4,words,5,some words here
+4,words,6,some words here
+4,timer,,30
+4,block_highlight,,true

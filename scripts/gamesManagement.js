@@ -9,8 +9,10 @@
   //#region ====== CSV ======
 
   async function loadGamesFromCSV() {
-    const url = "https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameData.csv" + "?t=" + Date.now();
-    
+    const url =
+      "https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameData.csv"
+      + "?t=" + Date.now();
+
     const res = await fetch(url, { cache: "no-store" });
     const text = await res.text();
 
@@ -19,27 +21,57 @@
       .replace(/\r/g, "\n")
       .split("\n")
       .filter(line => line.trim() !== "");
-    
+
     const headers = lines[0].split(",").map(h => h.trim());
 
-    return lines.slice(1).map(line => {
+    const rows = lines.slice(1).map(line => {
       const values = line.split(",").map(v => v.trim());
-      const raw = {};
-
+      const row = {};
       headers.forEach((h, i) => {
-        raw[h] = values[i];
+        row[h] = values[i] ?? "";
+      });
+      return row;
+    });
+
+    const PANEL_FIELDS = {
+      version: "",
+      title: "",
+      active: false,
+      levels: 0,
+      updatedAt: "-",
+      updatedBy: "-"
+    };
+
+    const gameIds = [...new Set(rows.map(r => Number(r.id)))];
+
+    const games = gameIds.map(id => {
+      const game = { id };
+
+      Object.keys(PANEL_FIELDS).forEach(field => {
+        const row = rows.find(
+          r =>
+            Number(r.id) === id &&
+            r.element === field &&
+            r.level === ""
+        );
+
+        game[field] = row
+          ? parseValue(row.value)
+          : PANEL_FIELDS[field];
       });
 
-      return {
-        id: Number(raw.id),
-        version: raw.version,
-        title: raw.title,
-        active: raw.active === "true",
-        levels: Number(raw.levels),
-        updatedAt: raw.updatedAt || "-",
-        updatedBy: raw.updatedBy || "-"
-      };
+      return game;
     });
+
+    return games;
+  }
+
+  // Helpers 
+  function parseValue(value) {
+    if (value === "true") return true;
+    if (value === "false") return false;
+    if (!isNaN(value) && value !== "") return Number(value);
+    return value;
   }
 
   //#endregion
