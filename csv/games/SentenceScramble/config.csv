@@ -1,2 +1,9 @@
-id,version,title,active,levels,updatedAt,updatedBy,timer,block_highlight
-1,v1.0.0,Sentence Scramble,true,6,1/1/2000,testuser,30,true
+key,value
+version,v1.0.0
+title,Sentence Scramble
+active,true
+levels,6
+updatedAt,1/1/2000
+updatedBy,testuser
+timer,30
+block_highlight,true

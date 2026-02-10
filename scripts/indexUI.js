@@ -274,6 +274,31 @@ function closeEditModal() {
 
 //#endregion
 
+async function loadCSV(url) {
+  const res = await fetch(url, { cache: "no-store" });
+  const text = await res.text();
+
+  const lines = text
+    .replace(/\r\n/g, "\n")
+    .replace(/\r/g, "\n")
+    .split("\n")
+    .filter(line => line.trim() !== "");
+
+  if (lines.length === 0) return [];
+
+  const headers = lines[0].split(",").map(h => h.trim());
+
+  return lines.slice(1).map(line => {
+    const values = line.split(",").map(v => v.trim());
+    const obj = {};
+    headers.forEach((h, i) => {
+      obj[h] = values[i];
+    });
+    return obj;
+  });
+}
+
+
 //#region ====== Replace CSV ====== 
 
 function downloadCSV(filename, csvText) {

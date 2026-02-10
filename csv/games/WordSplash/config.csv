@@ -1,2 +1,9 @@
-id,version,title,active,levels,updatedAt,updatedBy,lightning_timer,max_wrong
-1,v1.0.0,Word Splash,true,6,1/1/2000,testuser,90,3
+key,value
+version,v1.0.0
+title,Word Splash
+active,true
+levels,6
+updatedAt,1/1/2000
+updatedBy,testuser
+lightning_timer,90
+max_wrong,3

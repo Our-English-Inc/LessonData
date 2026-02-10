@@ -3,43 +3,64 @@
 
   let games = [];
   let footer = null;
+  let panelKeys = [];
+  let panelKeySet = new Set();
 
   //#endregion
 
   //#region ====== CSV ======
 
+  async function loadGameElementRules() {
+    const rows = await loadCSV("csv/GameElementRule.csv?t=" + Date.now());
+
+    panelKeys = [];
+    panelKeySet.clear();
+
+    rows.forEach(r => {
+      if (r.inPanel === "true") {
+        panelKeys.push(r.key);
+        panelKeySet.add(r.key);
+      }
+    });
+  }
+
+  function getPanelHeaderKeys() {
+  const ths = document
+    .querySelectorAll("#thead-games th[data-key]");
+
+    return Array.from(ths).map(th => th.dataset.key);
+  }
+
   async function loadGamesFromCSV() {
-    const url = "https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameData.csv" + "?t=" + Date.now();
-    
-    const res = await fetch(url, { cache: "no-store" });
-    const text = await res.text();
+    const gameDirs = [
+      "WordSplash",
+      "BubblePop",
+      "SentenceScramble",
+      "WordScramble"
+    ];
 
-    const lines = text
-      .replace(/\r\n/g, "\n")
-      .replace(/\r/g, "\n")
-      .split("\n")
-      .filter(line => line.trim() !== "");
-    
-    const headers = lines[0].split(",").map(h => h.trim());
+    const games = [];
 
-    return lines.slice(1).map(line => {
-      const values = line.split(",").map(v => v.trim());
-      const raw = {};
+    for (const gameDir of gameDirs) {
+      const url = `csv/games/${gameDir}/config.csv?t=${Date.now()}`;
+      const rows = await loadCSV(url);
 
-      headers.forEach((h, i) => {
-        raw[h] = values[i];
+      const game = {};
+      rows.forEach(r => {
+        game[r.key] = parseValue(r.value);
       });
 
-      return {
-        id: Number(raw.id),
-        version: raw.version,
-        title: raw.title,
-        active: raw.active === "true",
-        levels: Number(raw.levels),
-        updatedAt: raw.updatedAt || "-",
-        updatedBy: raw.updatedBy || "-"
-      };
-    });
+      game.key = gameDir;
+      games.push(game);
+    }
+
+    return games;
+  }
+
+  function parseValue(raw) {
+    if (raw === "true" || raw === "false") return raw === "true";
+    if (!isNaN(raw)) return Number(raw);
+    return raw;
   }
 
   //#endregion
@@ -57,10 +78,11 @@
 
   // Create row for each game
   function renderGamesRow(game, index){
-    return `
+    const headerKeys = getPanelHeaderKeys();
+
+    let html = `
       <td>${index + 1}</td>
 
-      <!-- Actions -->
       <td>
         <div class="actions">
           <button class="action-btn edit" title="Edit">✏️</button>
@@ -68,32 +90,37 @@
           <button class="action-btn delete" title="Delete">🗑️</button>
         </div>
       </td>
-
-      <!-- Version -->
-      <td>${game.version}</td>
-
-      <!-- Title -->
-      <td>${game.title}</td>
-
-      <!-- Active -->
-      <td>
-        <label class="switch-yn">
-          <input type="checkbox" ${game.active ? "checked" : ""}>
-          <span class="switch-track">
-            <span class="switch-label yes">YES</span>
-            <span class="switch-label no">NO</span>
-            <span class="switch-thumb"></span>
-          </span>
-        </label>
-      </td>
-
-      <!-- Levels -->
-      <td>${game.levels}</td>
-
-      <!-- Updated -->
-      <td>${game.updatedAt}</td>
-      <td>${game.updatedBy}</td>
     `;
+
+    headerKeys.forEach(key => {
+      if (!panelKeySet.has(key)) {
+        html += `<td>-</td>`;
+        return;
+      }
+
+      if (key === "active") {
+        html += `
+          <td>
+            <label class="switch-yn">
+              <input type="checkbox" ${game.active ? "checked" : ""}>
+              <span class="switch-track">
+                <span class="switch-label yes">YES</span>
+                <span class="switch-label no">NO</span>
+                <span class="switch-thumb"></span>
+              </span>
+            </label>
+          </td>
+        `;
+        return;
+      }
+
+      html += `<td>${game[key] ?? "-"}</td>`;
+    });
+
+
+    console.log("headerKeys:", getPanelHeaderKeys());
+console.log("panelKeySet:", Array.from(panelKeySet));
+    return html;
   }
 
   // Bind actions with interactctive UI components
@@ -105,7 +132,7 @@
         desc: "You are about to modify this game. This change will take effect immediately.",
         onConfirm: () => {
           openEditModal({
-            title: `Edit Game #${game.id}`,
+            title: `Edit #${game.title}`,
             data: game,
             fields: [
               { key: "version", label: "Version" },
@@ -148,7 +175,7 @@
         title: "Delete Game",
         desc: "This action cannot be undone. The deletion takes effect immediately.",
         onConfirm: () => {
-          console.log("Delete", game.id);
+          console.log("Delete", game.title);
           //TODO
         }
       });
@@ -159,7 +186,7 @@
     if (toggle) {
       toggle.onchange = () => {
         game.active = toggle.checked;
-        console.log("Game active changed:", game.id, game.active);
+        console.log("Game active changed:", game.title, game.active);
       };
     }
   }
@@ -195,6 +222,7 @@
     if (panel !== PANEL.GAMES) return;
 
     async function initGamesPage() {
+      await loadGameElementRules();
       games = await loadGamesFromCSV();
       setupIndexUI({ gamesCount: games.length });
 
