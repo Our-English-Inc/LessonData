@@ -136,20 +136,23 @@
         title: "Modify Game",
         desc: "You are about to modify this game. This change will take effect immediately.",
         onConfirm: () => {
+
+          const editModel = buildEditableModel(game.id);
+
           openEditModal({
             title: `Edit Game #${game.id}`,
-            data: game,
-            fields: [
-              { key: "version", label: "Version" },
-              { key: "title", label: "Title" },
-              { key: "active", label: "Active", type: "checkbox" },
-              { key: "levels", label: "Levels", type: "number" }
-            ],
+            data: editModel,
+            fields: buildFieldsFromEditableRows(editModel),
             onSave: async () => {
               try {
-                await saveGamesToServer(games);
-                drawGames();
-                showFooterMessage("✓ Saved to CSV");
+                allGameDataRows = [
+                  ...allGameDataRows.filter(r => Number(r.id) !== game.id),
+                  ...editModel.rows
+                ];
+
+                await saveGameDataToServer(allGameDataRows);
+
+                location.reload();
               } catch (e) {
                 alert("Save failed. Check server.");
               }
