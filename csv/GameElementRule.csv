@@ -1,0 +1,16 @@
+key,label,inPanel,inEditor
+
+id,#,true,false
+version,Version Number,true,false
+title,Game Title,true,true
+active,Active,true,true
+levels,Levels,true,true
+updatedAt,Last Updated,true,false
+updatedBy,Updated By,true,false
+
+timer,Timer (seconds),false,true
+lightning_timer,Lightning Timer (seconds),false,true
+max_wrong,Max Number of Wrong Actions,false,true
+block_highlight,Block Highlight,false,true
+words,Words,false,true
+sentences,Sentences,false,true
