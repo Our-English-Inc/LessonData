@@ -241,11 +241,15 @@ body {
 
 .modal-card {
   position: relative;
-  width: 480px;
-  margin: 20vh auto;
+  width: 1000px;
+  margin: 5vh auto;
   background: white;
   border-radius: 8px;
   padding: 28px 24px 24px;
+}
+
+.modal-content {
+  max-width: 100%;
 }
 
 /*#endregion */
