@@ -63,6 +63,26 @@
     return raw;
   }
 
+  async function hasContentCSV(game, key) {
+    const url = `csv/games/${game.key}/${key}.csv`;
+    try {
+      const res = await fetch(url, { method: "HEAD" });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  }
+
+  async function loadGameContentCSV(game, key) {
+    const url = `csv/games/${game.key}/${key}.csv?t=${Date.now()}`;
+
+    try {
+      return await loadCSV(url);
+    } catch (e) {
+      return null;
+    }
+  }
+
   //#endregion
 
   //#region ====== Header ======
@@ -117,9 +137,6 @@
       html += `<td>${game[key] ?? "-"}</td>`;
     });
 
-
-    console.log("headerKeys:", getPanelHeaderKeys());
-console.log("panelKeySet:", Array.from(panelKeySet));
     return html;
   }
 
@@ -149,7 +166,49 @@ console.log("panelKeySet:", Array.from(panelKeySet));
       });
   }
 
+  function renderEditorContent(contents, contentKeys) {
+    const container = document.getElementById("edit-content");
+    if (!container) return;
 
+    container.innerHTML = "";
+    if (Object.keys(contents).length === 0) return;
+
+    const title = document.createElement("h3");
+    title.textContent = "Content";
+    container.appendChild(title);
+
+    contentKeys.forEach(({ key, label }) => {
+      const rows = contents[key];
+      if (!rows) return;
+
+      const block = document.createElement("div");
+      block.className = "content-block";
+
+      const h4 = document.createElement("h4");
+      h4.textContent = label;
+      block.appendChild(h4);
+
+      rows.forEach(r => {
+        const level = Number(r.level);
+
+        const rowDiv = document.createElement("div");
+        rowDiv.className = "content-row";
+
+        rowDiv.innerHTML = `
+          <div>Level ${level}</div>
+          <textarea
+            data-content-key="${key}"
+            data-level="${r.level}"
+            rows="3"
+          >${r.value ?? ""}</textarea>
+        `;
+
+        block.appendChild(rowDiv);
+      });
+
+      container.appendChild(block);
+    });
+  }
 
   // Bind actions with interactctive UI components
   function bindGamesInteractiveUI(row, game) {
@@ -160,6 +219,23 @@ console.log("panelKeySet:", Array.from(panelKeySet));
         desc: "You are about to modify this game. This change will take effect immediately.",
         onConfirm: async () => {
           const fields = await getEditorFieldsFromRules(game);
+
+          const ruleRows = await loadCSV("csv/GameElementRule.csv?t=" + Date.now());
+          const contentKeys = [];
+
+          for (const r of ruleRows) {
+            if (r.inEditor !== "true") continue;
+            if (r.isContent !== "true") continue;
+
+            if (await hasContentCSV(game, r.key)) {
+              contentKeys.push({ key: r.key, label: r.label });
+            }
+          }
+          const contents = {};
+          for (const c of contentKeys) {
+            const rows = await loadGameContentCSV(game, c.key);
+            if (rows) contents[c.key] = rows;
+          }
 
           openEditModal({
             title: `Edit ${game.title}`,
@@ -175,6 +251,8 @@ console.log("panelKeySet:", Array.from(panelKeySet));
               }
             }
           });
+
+          renderEditorContent(contents, contentKeys);
         }
       });
     };

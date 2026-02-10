@@ -203,6 +203,11 @@ function openEditModal({ title, data, fields, onSave }) {
   document.getElementById("edit-modal-title").textContent = title;
   form.innerHTML = "";
 
+  // save space for educational content
+  const contentContainer = document.createElement("div");
+  contentContainer.id = "edit-content";
+  form.appendChild(contentContainer);
+
   fields.forEach(field => {
     const wrapper = document.createElement("div");
     wrapper.className = "edit-field";
