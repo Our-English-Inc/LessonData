@@ -3,6 +3,7 @@
 
   let games = [];
   let footer = null;
+  let allGameDataRows = [];
 
   //#endregion
 
@@ -20,50 +21,22 @@
       .replace(/\r\n/g, "\n")
       .replace(/\r/g, "\n")
       .split("\n")
-      .filter(line => line.trim() !== "");
+      .filter(l => l.trim() !== "");
 
     const headers = lines[0].split(",").map(h => h.trim());
 
     const rows = lines.slice(1).map(line => {
       const values = line.split(",").map(v => v.trim());
-      const row = {};
-      headers.forEach((h, i) => {
-        row[h] = values[i] ?? "";
-      });
-      return row;
+      const obj = {};
+      headers.forEach((h, i) => (obj[h] = values[i] ?? ""));
+      return obj;
     });
 
-    const PANEL_FIELDS = {
-      version: "",
-      title: "",
-      active: false,
-      levels: 0,
-      updatedAt: "-",
-      updatedBy: "-"
-    };
+    // ★ 关键：唯一真相源在这里
+    allGameDataRows = rows;
 
-    const gameIds = [...new Set(rows.map(r => Number(r.id)))];
-
-    const games = gameIds.map(id => {
-      const game = { id };
-
-      Object.keys(PANEL_FIELDS).forEach(field => {
-        const row = rows.find(
-          r =>
-            Number(r.id) === id &&
-            r.element === field &&
-            r.level === ""
-        );
-
-        game[field] = row
-          ? parseValue(row.value)
-          : PANEL_FIELDS[field];
-      });
-
-      return game;
-    });
-
-    return games;
+    // ↓↓↓ 你已经写好的 panel 聚合逻辑（示意）
+    return buildGamesFromRows(rows);
   }
 
   // Helpers 
@@ -72,6 +45,47 @@
     if (value === "false") return false;
     if (!isNaN(value) && value !== "") return Number(value);
     return value;
+  }
+
+  function buildEditableModel(gameId) {
+    return {
+      id: gameId,
+      rows: allGameDataRows
+        .filter(r =>
+          Number(r.id) === gameId &&
+          r.editable === "true"
+        )
+        .map(r => ({ ...r })) // clone，避免直接改真相源
+    };
+  }
+
+  function buildFieldsFromEditableRows(editModel) {
+    const fields = [];
+
+    // 按 element 分组
+    const grouped = {};
+    editModel.rows.forEach(row => {
+      grouped[row.element] ??= [];
+      grouped[row.element].push(row);
+    });
+
+    Object.values(grouped).forEach(rows => {
+      const elementLabel = rows[0].label || rows[0].element;
+
+      rows
+        .sort((a, b) => Number(a.level || 0) - Number(b.level || 0))
+        .forEach(row => {
+          const index = editModel.rows.indexOf(row);
+
+          fields.push({
+            key: `rows.${index}.value`,
+            label: row.level ? `Level ${row.level}` : elementLabel,
+            type: inferFieldType(row.value)
+          });
+        });
+    });
+
+    return fields;
   }
 
   //#endregion
@@ -146,12 +160,17 @@
             onSave: async () => {
               try {
                 allGameDataRows = [
-                  ...allGameDataRows.filter(r => Number(r.id) !== game.id),
+                  // 保留：
+                  // 1. 不是当前 game 的
+                  // 2. 或者是当前 game 但 editable !== true 的
+                  ...allGameDataRows.filter(r =>
+                    Number(r.id) !== game.id || r.editable !== "true"
+                  ),
+                  // 替换：当前 game 的 editable 行
                   ...editModel.rows
                 ];
 
                 await saveGameDataToServer(allGameDataRows);
-
                 location.reload();
               } catch (e) {
                 alert("Save failed. Check server.");

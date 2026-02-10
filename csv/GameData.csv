@@ -1,57 +1,57 @@
-id,element,level,value,editable
-1,version,,v1.0.0,false
-1,title,,Word Splash,true
-1,active,,true,true
-1,levels,,6,true
-1,updatedAt,,1/1/2026,false
-1,updatedBy,,testuser,false
-1,words,1,some words here,true
-1,words,2,some words here,true
-1,words,3,some words here,true
-1,words,4,some words here,true
-1,words,5,some words here,true
-1,words,6,some words here,true
-1,lightning_timer,,90,true
-1,max_wrong,,3,true
-2,version,,v1.0.0,false
-2,title,,Sentence Scramble,true
-2,active,,true,true
-2,levels,,6,true
-2,updatedAt,,1/1/2026,false
-2,updatedBy,,testuser,false
-2,sentences,1,some sentences here,true
-2,sentences,2,some sentences here,true
-2,sentences,3,some sentences here,true
-2,sentences,4,some sentences here,true
-2,sentences,5,some sentences here,true
-2,sentences,6,some sentences here,true
-2,timer,,30,true
-2,block_highlight,,true,true
-3,version,,v1.0.0,false
-3,title,,Bubble Pop,true
-3,active,,true,true
-3,levels,,6,true
-3,updatedAt,,1/1/2026,false
-3,updatedBy,,testuser,false
-3,words,1,some words here,true
-3,words,2,some words here,true
-3,words,3,some words here,true
-3,words,4,some words here,true
-3,words,5,some words here,true
-3,words,6,some words here,true
-3,lightning_timer,,90,true
-3,max_wrong,,3,true
-4,version,,v1.0.0,false
-4,title,,Word Scramble,true
-4,active,,true,true
-4,levels,,6,true
-4,updatedAt,,1/1/2026,false
-4,updatedBy,,testuser,false
-4,words,1,some words here,true
-4,words,2,some words here,true
-4,words,3,some words here,true
-4,words,4,some words here,true
-4,words,5,some words here,true
-4,words,6,some words here,true
-4,timer,,30,true
-4,block_highlight,,true,true
+id,element,level,label,value,editable
+1,version,,Version Number,v1.0.0,false
+1,title,,Game Title,Word Splash,true
+1,active,,Active,true,true
+1,levels,,Levels,6,true
+1,updatedAt,,Last Updated,1/1/2026,false
+1,updatedBy,,Updated By,testuser,false
+1,words,1,Words of Level 1,some words here,true
+1,words,2,Words of Level 2,some words here,true
+1,words,3,Words of Level 3,some words here,true
+1,words,4,Words of Level 4,some words here,true
+1,words,5,Words of Level 5,some words here,true
+1,words,6,Words of Level 6,some words here,true
+1,lightning_timer,,Lightning Timer(seconds),90,true
+1,max_wrong,,Max Number of Wrong,3,true
+2,version,,Version Number,v1.0.0,false
+2,title,,Game Title,Sentence Scramble,true
+2,active,,Active,true,true
+2,levels,,Levels,6,true
+2,updatedAt,,Last Updated,1/1/2026,false
+2,updatedBy,,Updated By,testuser,false
+2,sentences,1,Sentences of Level 1,some sentences here,true
+2,sentences,2,Sentences of Level 2,some sentences here,true
+2,sentences,3,Sentences of Level 3,some sentences here,true
+2,sentences,4,Sentences of Level 4,some sentences here,true
+2,sentences,5,Sentences of Level 5,some sentences here,true
+2,sentences,6,Sentences of Level 6,some sentences here,true
+2,timer,,Timer(seconds),30,true
+2,block_highlight,,Block Highlight,true,true
+3,version,,Version Number,v1.0.0,false
+3,title,,Game Title,Bubble Pop,true
+3,active,,Active,true,true
+3,levels,,Levels,6,true
+3,updatedAt,,Last Updated,1/1/2026,false
+3,updatedBy,,Updated By,testuser,false
+3,words,1,Words of Level 1,some words here,true
+3,words,2,Words of Level 2,some words here,true
+3,words,3,Words of Level 3,some words here,true
+3,words,4,Words of Level 4,some words here,true
+3,words,5,Words of Level 5,some words here,true
+3,words,6,Words of Level 6,some words here,true
+3,lightning_timer,,Lightning Timer(seconds),90,true
+3,max_wrong,,Max Number of Wrong,3,true
+4,version,,Version Number,v1.0.0,false
+4,title,,Game Title,Word Scramble,true
+4,active,,Active,true,true
+4,levels,,Levels,6,true
+4,updatedAt,,Last Updated,1/1/2026,false
+4,updatedBy,,Updated By,testuser,false
+4,words,1,Sentences of Level 1,some words here,true
+4,words,2,Sentences of Level 2,some words here,true
+4,words,3,Sentences of Level 3,some words here,true
+4,words,4,Sentences of Level 4,some words here,true
+4,words,5,Sentences of Level 5,some words here,true
+4,words,6,Sentences of Level 6,some words here,true
+4,timer,,Timer(seconds),30,true
+4,block_highlight,,Block Highlight,true,true
