@@ -369,12 +369,12 @@ async function saveGamesToServer(game) {
     rows.map(r => `${r[0]},${r[1]}`).join("\n");
 
   const res = await fetch(
-    "https://oe-game-test-function-.../api/saveGamesCSV",
+    "https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net/api/saveGamesCSV",
     {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        gameKey: game.id,
+        gameKey: game.key,
         csv
       })
     }
