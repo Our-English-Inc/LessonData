@@ -203,11 +203,6 @@ function openEditModal({ title, data, fields, onSave }) {
   document.getElementById("edit-modal-title").textContent = title;
   form.innerHTML = "";
 
-  // save space for educational content
-  const contentContainer = document.createElement("div");
-  contentContainer.id = "edit-content";
-  form.appendChild(contentContainer);
-
   fields.forEach(field => {
     const wrapper = document.createElement("div");
     wrapper.className = "edit-field";
@@ -246,9 +241,23 @@ function openEditModal({ title, data, fields, onSave }) {
       input = document.createElement("input");
       input.type = field.type || "text";
       input.value = draftData[field.key] ?? "";
-      input.oninput = e => {
-        draftData[field.key] = e.target.value;
-      };
+      
+      if (field.key === "levels") {
+        input.oninput = e => {
+          const onLevelChange = e => {
+            const v = Math.max(0, Number(e.target.value) || 0);
+            draftData.levels = v;
+            syncContentWithLevels(v);
+          };
+
+          input.oninput = onLevelChange;
+          input.onchange = onLevelChange;
+        }
+      } else {
+        input.oninput = e => {
+          draftData[field.key] = e.target.value;
+        };
+      }
     }
 
     label.appendChild(input);
@@ -256,6 +265,11 @@ function openEditModal({ title, data, fields, onSave }) {
     form.appendChild(wrapper);
   });
 
+  // Educational content
+  const contentContainer = document.createElement("div");
+  contentContainer.id = "edit-content";
+  form.appendChild(contentContainer);
+  
   modal.classList.remove("hidden");
 
   // Discard editing

@@ -5,6 +5,7 @@
   let footer = null;
   let panelKeys = [];
   let panelKeySet = new Set();
+  let currentContentKeys = [];
 
   //#endregion
 
@@ -210,6 +211,48 @@
     });
   }
 
+  window.syncContentWithLevels = function (levelCount) {
+    const container = document.getElementById("edit-content");
+    if (!container) return;
+
+    const existing = {};
+    container.querySelectorAll("textarea").forEach(t => {
+      const key = t.dataset.contentKey;
+      const level = Number(t.dataset.level);
+      if (!existing[key]) existing[key] = {};
+      existing[key][level] = t.value;
+    });
+
+    container.innerHTML = "";
+
+    currentContentKeys.forEach(({ key, label }) => {
+      const block = document.createElement("div");
+      block.className = "content-block";
+
+      const h4 = document.createElement("h4");
+      h4.textContent = label;
+      block.appendChild(h4);
+
+      for (let i = 1; i <= levelCount; i++) {
+        const row = document.createElement("div");
+        row.className = "content-row";
+
+        row.innerHTML = `
+          <div>Level ${i}</div>
+          <textarea
+            data-content-key="${key}"
+            data-level="${i}"
+            rows="3"
+          >${existing[key]?.[i] ?? ""}</textarea>
+        `;
+
+        block.appendChild(row);
+      }
+
+      container.appendChild(block);
+    });
+  };
+
   // Bind actions with interactctive UI components
   function bindGamesInteractiveUI(row, game) {
     // "Edit" Button
@@ -222,6 +265,7 @@
 
           const ruleRows = await loadCSV("csv/GameElementRule.csv?t=" + Date.now());
           const contentKeys = [];
+          currentContentKeys = contentKeys;
 
           for (const r of ruleRows) {
             if (r.inEditor !== "true") continue;
@@ -253,6 +297,7 @@
           });
 
           renderEditorContent(contents, contentKeys);
+          syncContentWithLevels(draftData.levels);
         }
       });
     };
