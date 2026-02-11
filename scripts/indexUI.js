@@ -373,9 +373,12 @@ async function saveGamesToServer(games) {
   const res = await fetch("https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net/api/saveGamesCSV", {
     method: "POST",
     headers: {
-      "Content-Type": "text/csv; charset=utf-8"
+    "Content-Type": "application/json"
     },
-    body: csv
+    body: JSON.stringify({
+      gameKey: game.key,
+      csv
+    })
   });
 
   if (!res.ok) {
