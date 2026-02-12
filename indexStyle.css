@@ -246,10 +246,17 @@ body {
   background: white;
   border-radius: 8px;
   padding: 28px 24px 24px;
+
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
 }
 
 .modal-content {
   max-width: 100%;
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
 }
 
 /*#endregion */
