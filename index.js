@@ -4,10 +4,111 @@ const PANEL = {
   GAMES: "games",
   ADMINS: "admins"
 };
+const PERMISSIONS = {
+  Admin: {
+    adminPanel: true,
+    edit: true,
+    restore: true,
+    delete: true,
+    view: false,
+  },
+  Editor: {
+    adminPanel: false,
+    edit: true,
+    restore: true,
+    delete: false,
+    view: false,
+  },
+  QA: {
+    adminPanel: false,
+    edit: false,
+    restore: false,
+    delete: false,
+    view: true,
+  },
+};
 const ADMIN_PASSWORD = "admin123";
+const FUNCTION_BASE = "https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net";
 
 let currentPanel = null;
 let pendingAction = null;
+
+//#endregion
+
+//#region ====== Login ======
+
+async function checkLogin() {
+  try {
+    const res = await fetch(
+      `${FUNCTION_BASE}/api/getCurrentUser`,
+      { credentials: "include" }
+    );
+
+    if (!res.ok) {
+      window.location.href =
+        `${FUNCTION_BASE}/.auth/login/aad`;
+      return;
+    }
+
+    const user = await res.json();
+    window.currentUser = user;
+
+    const role = await determineUserRole(user);
+    window.currentRole = role;
+
+    if (!role) {
+      alert("You are not authorized.");
+      return;
+    }
+
+    console.log("Role:", role);
+
+    applyPermissions(role);
+
+  } catch (err) {
+    console.error("Login check failed:", err);
+  }
+}
+
+async function determineUserRole(user) {
+
+  const admins = await loadCSV(
+    "csv/AdminData.csv"
+  );
+
+  const record = admins.find(a =>
+    a.email.toLowerCase() === user.email.toLowerCase() &&
+    a.active === "true"
+  );
+
+  // Ban external users
+  if(!record) return null;
+
+  return record?.role || "QA";
+}
+
+function toggle(id, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = show ? "" : "none";
+}
+
+function toggleGroup(className, show) {
+  document.querySelectorAll(`.${className}`)
+    .forEach(el => {
+      el.style.display = show ? "" : "none";
+    });
+}
+
+function applyPermissions(role) {
+
+  const p = PERMISSIONS[role] || PERMISSIONS["QA"];
+
+  toggle("adminButton", p.adminPanel);
+  toggleGroup("editButtons", p.edit);
+  toggleGroup("restoreButtons", p.restore);
+  toggleGroup("deleteButtons", p.delete);
+}
 
 //#endregion
 
@@ -291,8 +392,6 @@ function closeEditModal() {
   draftData = null;
 }
 
-//#endregion
-
 async function loadCSV(url) {
   const res = await fetch(url, { cache: "no-store" });
   const text = await res.text();
@@ -317,6 +416,7 @@ async function loadCSV(url) {
   });
 }
 
+//#endregion
 
 //#region ====== Replace CSV ====== 
 
@@ -468,3 +568,5 @@ async function restoreCSV(target) {
 }
 
 //#endregion
+
+checkLogin();
