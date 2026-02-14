@@ -48,8 +48,8 @@ async function checkLogin() {
       const redirect = encodeURIComponent(window.location.href);
 
       window.location.href =
-        `${FUNCTION_BASE}/.auth/login/aad?post_login_redirect_uri=${redirect}`;
-      return;
+        `${FUNCTION_BASE}/.auth/login/aad?post_login_redirect_uri=${FUNCTION_BASE}/.auth/login/done?returnUrl=${redirect}`;
+
     }
 
     const user = await res.json();
