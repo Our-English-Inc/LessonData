@@ -124,7 +124,7 @@
         html += `
           <td>
             <label class="switch-yn">
-              <input type="checkbox" ${game.active ? "checked" : ""}>
+              <input type="checkbox" ${game.active ? "checked" : ""} disabled>
               <span class="switch-track">
                 <span class="switch-label yes">YES</span>
                 <span class="switch-label no">NO</span>
