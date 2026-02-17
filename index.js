@@ -75,9 +75,7 @@ async function checkLogin() {
 
 async function determineUserRole(user) {
 
-  const admins = await loadCSV(
-    "csv/AdminData.csv"
-  );
+  const admins = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/AdminData.csv" + "?t=" + Date.now());
 
   const record = admins.find(a =>
     a.email.toLowerCase() === user.email.toLowerCase() &&
