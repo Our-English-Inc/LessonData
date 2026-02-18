@@ -1,5 +1,15 @@
 //#region ====== DOM References ======
 
+// Panel Switch
+const btnGames = document.getElementById("btn-games");
+const btnMarketplace = document.getElementById("btn-marketplace");
+const btnAdmins = document.getElementById("btn-admins");
+const titleText = document.getElementById("header-title-text");
+const itemCount = document.getElementById("item-count");
+const theadGames = document.getElementById("thead-games");
+const theadAdmins = document.getElementById("thead-admins");
+const theadMarketplace = document.getElementById("thead-marketplace");
+
 // Action Modal
 const modal = document.getElementById("action-modal");
 const modalTitle = document.getElementById("modal-title");
@@ -16,7 +26,8 @@ const cancelBtn = document.getElementById("modal-cancel");
 
 const PANEL = {
   GAMES: "games",
-  ADMINS: "admins"
+  ADMINS: "admins",
+  MARKETPLACE: "marketplace"
 };
 const PERMISSIONS = {
   Admin: {
@@ -137,46 +148,65 @@ function getPanel() {
 }
 
 // Update content according to selected panel
-function setupIndexUI({ gamesCount = 0, adminsCount = 0 }) {
+function setupIndexUI({ gamesCount = 0, adminsCount = 0, marketplaceCount = 0 }) {
   const panel = getPanel();
 
-  const toggleBtn = document.getElementById("panel-toggle-btn");
-  const titleText = document.getElementById("header-title-text");
-  const itemCount = document.getElementById("item-count");
-  const theadGames = document.getElementById("thead-games");
-  const theadAdmins = document.getElementById("thead-admins");
+  btnGames.style.display = "";
+  btnMarketplace.style.display = "";
+  btnAdmins.style.display = "";
 
   if (panel === PANEL.GAMES) {
     // Header
-    document.title = "Our English - Games Management";
-    titleText.textContent = "Games";
+    document.title = "Our English - Review Management";
+    titleText.textContent = "Review";
     itemCount.textContent = `(${gamesCount})`;
 
     // Toggle button
-    toggleBtn.textContent = "Admins Management";
-    toggleBtn.onclick = () => {
-      location.href = "index.html?panel=admins";
-    };
+    btnGames.style.display = "none";
 
     // Table head
     theadGames.classList.remove("hidden");
     theadAdmins.classList.add("hidden");
-  } else {
+    theadMarketplace.classList.add("hidden");
+  } else if (panel === PANEL.ADMINS) {
     // Header
     document.title = "Our English - Admins Management";
     titleText.textContent = "Admins";
     itemCount.textContent = `(${adminsCount})`;
 
     // Toggle button
-    toggleBtn.textContent = "Games Management";
-    toggleBtn.onclick = () => {
-      location.href = "index.html?panel=games";
-    };
+    btnAdmins.style.display = "none";
 
     // Table head
     theadGames.classList.add("hidden");
     theadAdmins.classList.remove("hidden");
+    theadMarketplace.classList.add("hidden");
+  } else {
+    // Header
+    document.title = "Our English - Marketplace Management";
+    titleText.textContent = "Marketplace";
+    itemCount.textContent = `(${marketplaceCount})`;
+
+    // Toggle button
+    btnMarketplace.style.display = "none";
+
+    // Table head
+    theadGames.classList.add("hidden");
+    theadAdmins.classList.add("hidden");
+    theadMarketplace.classList.remove("hidden");
   }
+
+  btnGames.onclick = () => {
+    location.href = "index.html?panel=games";
+  };
+
+  btnMarketplace.onclick = () => {
+    location.href = "index.html?panel=marketplace";
+  };
+
+  btnAdmins.onclick = () => {
+    location.href = "index.html?panel=admins";
+  };
 
   return panel;
 }
