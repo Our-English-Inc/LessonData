@@ -106,9 +106,10 @@
 
       <td>
         <div class="actions">
-          <button class="action-btn edit" title="Edit">✏️</button>
-          <button class="action-btn restore" title="Restore">🔄</button>
-          <button class="action-btn delete" title="Delete">🗑️</button>
+          <button class="action-btn edit gameEditBtn" title="Edit">✏️</button>
+          <button class="action-btn restore gameRestoreBtn" title="Restore">🔄</button>
+          <button class="action-btn delete gameDeleteBtn" title="Delete">🗑️</button>
+          <button class="action-btn view gameViewBtn" title="View">🔎</button>
         </div>
       </td>
     `;
@@ -123,7 +124,7 @@
         html += `
           <td>
             <label class="switch-yn">
-              <input type="checkbox" ${game.active ? "checked" : ""}>
+              <input type="checkbox" ${game.active ? "checked" : ""} disabled>
               <span class="switch-track">
                 <span class="switch-label yes">YES</span>
                 <span class="switch-label no">NO</span>
@@ -145,29 +146,25 @@
     const rows = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameElementRule.csv?t=" + Date.now());
 
     return rows
-      .filter(r => {
-        if (r.inEditor !== "true") return false;
+    .filter(r => {
+      if (!(r.key in game)) return false;
+      return r.inEditor === "true" || r.canReadOnly === "true";
+    })
+    .map(r => {
+      const field = {
+        key: r.key,
+        label: r.label,
+        readonly: r.inEditor !== "true"
+      };
 
-        const key = r.key;
+      if (r.key === "active") field.type = "checkbox";
+      if (r.key === "levels") field.type = "number";
 
-        if (key in game) return true;
-
-        return false;
-      })
-      .map(r => {
-        const field = {
-          key: r.key,
-          label: r.label
-        };
-
-        if (r.key === "active") field.type = "checkbox";
-        if (r.key === "levels") field.type = "number";
-
-        return field;
-      });
+      return field;
+    });
   }
 
-  function renderEditorContent(contents, contentKeys) {
+  function renderEditorContent(contents, contentKeys, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
 
@@ -195,14 +192,19 @@
         const rowDiv = document.createElement("div");
         rowDiv.className = "content-row";
 
-        rowDiv.innerHTML = `
-          <div>Level ${level}</div>
-          <textarea
-            data-content-key="${key}"
-            data-level="${r.level}"
-            rows="3"
-          >${r.value ?? ""}</textarea>
-        `;
+        const textarea = document.createElement("textarea");
+        textarea.dataset.contentKey = key;
+        textarea.dataset.level = r.level;
+        textarea.rows = 3;
+        textarea.value = r.value ?? "";
+
+        if (readonlyMode) {
+          textarea.disabled = true;
+          textarea.classList.add("readonly-field");
+        }
+
+        rowDiv.appendChild(document.createElement("div")).textContent = `Level ${level}`;
+        rowDiv.appendChild(textarea);
 
         block.appendChild(rowDiv);
       });
@@ -211,7 +213,7 @@
     });
   }
 
-  window.syncContentWithLevels = function (levelCount) {
+  window.syncContentWithLevels = function (levelCount, readonlyMode = true) {
     const container = document.getElementById("edit-content");
     if (!container) return;
 
@@ -237,14 +239,17 @@
         const row = document.createElement("div");
         row.className = "content-row";
 
-        row.innerHTML = `
-          <div>Level ${i}</div>
-          <textarea
-            data-content-key="${key}"
-            data-level="${i}"
-            rows="3"
-          >${existing[key]?.[i] ?? ""}</textarea>
-        `;
+        const textarea = document.createElement("textarea");
+        textarea.dataset.contentKey = key;
+        textarea.dataset.level = i;
+        textarea.rows = 3;
+        textarea.value = existing[key]?.[i] ?? "";
+
+        if (readonlyMode) {
+          textarea.disabled = true;
+        }
+
+        row.appendChild(textarea);
 
         block.appendChild(row);
       }
@@ -260,6 +265,7 @@
       openActionModal({
         title: "Modify Game",
         desc: "You are about to modify this game. This change will take effect immediately.",
+        requiredText: `Edit ${game.title}`,
         onConfirm: async () => {
           const fields = await getEditorFieldsFromRules(game);
 
@@ -307,6 +313,7 @@
       openActionModal({
         title: "Restore Latest Safe Version",
         desc: "This will restore the game to the most recent safe version. Any unsaved changes will be lost. This action takes effect immediately.",
+        requiredText: `Restore ${game.title}`,
         onConfirm: async () => {
           try {
             await restoreCSV(game.key);
@@ -322,11 +329,48 @@
       openActionModal({
         title: "Delete Game",
         desc: "This action cannot be undone. The deletion takes effect immediately.",
+        requiredText: `Delete ${game.title}`,
         onConfirm: () => {
           console.log("Delete", game.title);
           //TODO
         }
       });
+    };
+
+    // "View" Button
+    row.querySelector(".view").onclick = async() => {
+      const fields = await getEditorFieldsFromRules(game);
+
+      const ruleRows = await loadCSV(
+        "https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameElementRule.csv?t=" + Date.now()
+      );
+
+      const contentKeys = [];
+      currentContentKeys = contentKeys;
+
+      for (const r of ruleRows) {
+        if (r.isContent !== "true") continue;
+
+        if (await hasContentCSV(game, r.key)) {
+          contentKeys.push({ key: r.key, label: r.label });
+        }
+      }
+
+      const contents = {};
+      for (const c of contentKeys) {
+        const rows = await loadGameContentCSV(game, c.key);
+        if (rows) contents[c.key] = rows;
+      }
+
+      openEditModal({
+        title: `View ${game.title}`,
+        data: game,
+        fields,
+        readonlyMode: true
+      });
+
+      renderEditorContent(contents, contentKeys, true);
+      syncContentWithLevels(game.levels);
     };
 
     // "Active" Switch
@@ -358,6 +402,11 @@
 
     // Update UI
     updateGameCount();
+
+    // Set button visibilities based on admin roles
+    if (window.currentRole) {
+      applyPermissions(window.currentRole);
+    }
   }
 
   //#endregion

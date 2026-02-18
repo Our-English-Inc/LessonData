@@ -1,7 +1,7 @@
 (() => {
   //#region ====== Variables ======
 
-  const ADMIN_ROLES = ["Admin", "QA", "Guest"];
+  const ADMIN_ROLES = ["Admin", "Editor", "QA"];
 
   let admins = [];
   let footer = null;
@@ -60,7 +60,7 @@
   // Create drop-down list for Role
   function renderRoleSelect(admin) {
     return `
-      <select class="role-select">
+      <select class="role-select" disabled>
         ${ADMIN_ROLES.map(role => `
           <option value="${role}" ${role === admin.role ? "selected" : ""}>
             ${role}
@@ -97,7 +97,7 @@
       <!-- Active -->
       <td class="col-center">
         <label class="switch-yn">
-          <input type="checkbox" ${admin.active ? "checked" : ""}>
+          <input type="checkbox" ${admin.active ? "checked" : ""} disabled>
           <span class="switch-track">
             <span class="switch-label yes">YES</span>
             <span class="switch-label no">NO</span>
@@ -115,6 +115,7 @@
       openActionModal({
         title: "Modify Admin",
         desc: "You are about to modify this admin account. This change will take effect immediately.",
+        requiredText: `Edit ${admin.username}`,
         onConfirm: () => {
           openEditModal({
             title: `Edit Admin`,
@@ -146,6 +147,7 @@
       openActionModal({
         title: "Restore Latest Safe Version",
         desc: "This will restore ALL the admin accounts to the most recent safe version. ALL changes since last safe version will be lost. This action takes effect immediately.",
+        requiredText: `Restore ${admin.username}`,
         onConfirm: async () => {
           try {
             await restoreCSV("AdminData");
@@ -161,6 +163,7 @@
       openActionModal({
         title: "Delete Admin",
         desc: "This action cannot be undone. The deletion takes effect immediately.",
+        requiredText: `Delete ${admin.username}`,
         onConfirm: () => {
           console.log("Delete admin:", admin.id);
           //TODO

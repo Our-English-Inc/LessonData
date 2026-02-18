@@ -1,13 +1,131 @@
+//#region ====== DOM References ======
+
+// Action Modal
+const modal = document.getElementById("action-modal");
+const modalTitle = document.getElementById("modal-title");
+const modalDesc = document.getElementById("modal-desc");
+const modalRequiredText = document.getElementById("modal-requiredText");
+const passwordInput = document.getElementById("modal-password");
+const awareCheckbox = document.getElementById("modal-aware");
+const confirmBtn = document.getElementById("modal-confirm");
+const cancelBtn = document.getElementById("modal-cancel");
+
+//#endregion
+
 //#region ====== Variables ======
 
 const PANEL = {
   GAMES: "games",
   ADMINS: "admins"
 };
-const ADMIN_PASSWORD = "admin123";
+const PERMISSIONS = {
+  Admin: {
+    adminPanel: true,
+    edit: true,
+    restore: true,
+    delete: true,
+    view: false,
+  },
+  Editor: {
+    adminPanel: false,
+    edit: true,
+    restore: true,
+    delete: false,
+    view: false,
+  },
+  QA: {
+    adminPanel: false,
+    edit: false,
+    restore: false,
+    delete: false,
+    view: true,
+  },
+};
+const FUNCTION_BASE = "https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net";
 
 let currentPanel = null;
 let pendingAction = null;
+
+//#endregion
+
+//#region ====== Login ======
+
+async function checkLogin() {
+  try {
+    const res = await fetch(
+      `${FUNCTION_BASE}/api/getCurrentUser`,
+      { credentials: "include" }
+    );
+
+    if (!res.ok) {
+      const redirect = encodeURIComponent(window.location.href);
+
+      window.location.href =
+        `${FUNCTION_BASE}/.auth/login/aad?post_login_redirect_uri=${encodeURIComponent(
+          FUNCTION_BASE + "/api/loginRedirect?target=" + redirect
+        )}`;
+    }
+
+    const user = await res.json();
+    window.currentUser = user;
+
+    const role = await determineUserRole(user);
+    window.currentRole = role;
+
+    if (!role) {
+      alert("You are not authorized.");
+      return;
+    }
+
+    console.log("User:", user);
+    console.log("Role:", role);
+
+    applyPermissions(role);
+  } catch (err) {
+    console.error("Login check failed:", err);
+  }
+}
+
+async function determineUserRole(user) {
+
+  const admins = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/AdminData.csv" + "?t=" + Date.now());
+
+  const record = admins.find(a =>
+    a.email.toLowerCase() === user.email.toLowerCase() &&
+    a.active === "true"
+  );
+
+  // Ban external users
+  if(!record) return null;
+
+  return record?.role || "QA";
+}
+
+function toggle(id, show) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.style.display = show ? "" : "none";
+}
+
+function toggleGroup(className, show) {
+  document.querySelectorAll(`.${className}`)
+    .forEach(el => {
+      el.style.display = show ? "" : "none";
+    });
+}
+
+function applyPermissions(role) {
+  const p = PERMISSIONS[role] || PERMISSIONS["QA"];
+  const panel = getPanel(); 
+
+  if (panel === PANEL.GAMES) {
+    toggle("panel-toggle-btn", p.adminPanel);
+    toggleGroup("gameEditBtn", p.edit);
+    toggleGroup("gameRestoreBtn", p.restore);
+    toggleGroup("gameDeleteBtn", p.delete);
+    toggleGroup("gameViewBtn", p.view);
+  }
+}
 
 //#endregion
 
@@ -139,61 +257,45 @@ function createFooterController({ onPageChange }) {
 
 //#region ====== Action Confirmation Modal ======
 
-function openActionModal({ title, desc, onConfirm }) {
-    const modal = document.getElementById("action-modal");
-    const passwordInput = document.getElementById("modal-password");
-    const awareCheckbox = document.getElementById("modal-aware");
-    const confirmBtn = document.getElementById("modal-confirm");
-    const errorEl = document.getElementById("modal-password-error");
+function openActionModal({ title, desc, requiredText, onConfirm }) {
+  // Initialization
+  modalTitle.textContent = title;
+  modalDesc.textContent = desc;
+  modalRequiredText.textContent = `Type "${requiredText}" to confirm.`;
+  passwordInput.value = "";
+  awareCheckbox.checked = false;
+  confirmBtn.disabled = true;
+  modal.classList.remove("hidden");
 
-    document.getElementById("modal-title").textContent = title;
-    document.getElementById("modal-desc").textContent = desc;
+  // Confirm Button only active when input is correct and aware is checked
+  const updateConfirmState = () => {confirmBtn.disabled = !(passwordInput.value === requiredText && awareCheckbox.checked);};
+  passwordInput.oninput = updateConfirmState;
+  awareCheckbox.onchange = updateConfirmState;
 
-    passwordInput.value = "";
-    awareCheckbox.checked = false;
-    confirmBtn.disabled = true;
-    errorEl.classList.add("hidden");
+  pendingAction = onConfirm;
+}
 
-    modal.classList.remove("hidden");
+// Cancel Button action
+cancelBtn.onclick = () => {
+  modal.classList.add("hidden");
+};
 
-    const updateConfirmState = () => {
-      confirmBtn.disabled = !(
-        passwordInput.value.length > 0 && awareCheckbox.checked
-      );
-      errorEl.classList.add("hidden");
-    };
+// Confirm Button action
+confirmBtn.onclick = () => {
+  if (confirmBtn.disabled) return;
 
-    passwordInput.oninput = updateConfirmState;
-    awareCheckbox.onchange = updateConfirmState;
+  modal.classList.add("hidden");
+  if (pendingAction) pendingAction();
+};
 
-    pendingAction = onConfirm;
-  }
-
-  document.getElementById("modal-cancel").onclick = () => {
-    document.getElementById("action-modal").classList.add("hidden");
-  };
-
-  document.getElementById("modal-confirm").onclick = () => {
-    const passwordInput = document.getElementById("modal-password");
-    const errorEl = document.getElementById("modal-password-error");
-
-    if (passwordInput.value !== ADMIN_PASSWORD) {
-      errorEl.classList.remove("hidden");
-      return;
-    }
-
-    document.getElementById("action-modal").classList.add("hidden");
-    if (pendingAction) pendingAction();
-  };
-
-  //#endregion
+//#endregion
 
 //#region ====== Edit Modal ======
 
 let editingTarget = null;
 let draftData = null;
 
-function openEditModal({ title, data, fields, onSave }) {
+function openEditModal({ title, data, fields, onSave, readonlyMode = false }) {
   editingTarget = data;
   draftData = structuredClone(data);
 
@@ -220,6 +322,11 @@ function openEditModal({ title, data, fields, onSave }) {
         draftData[field.key] = e.target.checked;
       };
 
+      // Disable checkbox in ReadOnly
+      if (field.readonly || readonlyMode) {
+        input.disabled = true;
+        input.onclick = e => e.preventDefault();
+      }
     } else if (field.type === "select") {
       input = document.createElement("select");
 
@@ -258,6 +365,12 @@ function openEditModal({ title, data, fields, onSave }) {
           draftData[field.key] = e.target.value;
         };
       }
+
+      // Read Only
+      if (field.readonly || readonlyMode) {
+        input.disabled = true;
+        input.classList.add("readonly-field");
+      }
     }
 
     label.appendChild(input);
@@ -278,7 +391,9 @@ function openEditModal({ title, data, fields, onSave }) {
   };
 
   // Save editing
-  document.getElementById("edit-save").onclick = () => {
+  const saveBtn = document.getElementById("edit-save");
+  saveBtn.style.display = readonlyMode ? "none" : "";
+  saveBtn.onclick = () => {
     Object.assign(editingTarget, draftData);
     if (onSave) onSave(editingTarget);
     closeEditModal();
@@ -290,8 +405,6 @@ function closeEditModal() {
   editingTarget = null;
   draftData = null;
 }
-
-//#endregion
 
 async function loadCSV(url) {
   const res = await fetch(url, { cache: "no-store" });
@@ -317,6 +430,7 @@ async function loadCSV(url) {
   });
 }
 
+//#endregion
 
 //#region ====== Replace CSV ====== 
 
@@ -468,3 +582,5 @@ async function restoreCSV(target) {
 }
 
 //#endregion
+
+checkLogin();
