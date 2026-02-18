@@ -553,6 +553,52 @@ async function saveGamesToServer(game) {
   }
 }
 
+// For Marketplace Panel
+async function saveMarketplaceToServer(game) {
+
+  const configRows = [
+    ["version", game.version],
+    ["title", game.title],
+    ["active", game.active ? "true" : "false"],
+    ["levels", game.levels],
+    ["updatedAt", game.updatedAt || "1/1/2000"],
+    ["updatedBy", game.updatedBy || "testuser"],
+    ["lightning_timer", game.lightning_timer || 90],
+    ["max_wrong", game.max_wrong || 3]
+  ];
+
+  const configCSV =
+    "key,value\n" +
+    configRows.map(r => `${r[0]},${r[1]}`).join("\n");
+
+  const contentCSV = collectContentCSV();
+
+  const contentType =
+    game.key.includes("Sentence")
+      ? "sentences"
+      : "words";
+
+  const res = await fetch(
+    "https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net/api/saveMarketplaceCSV",
+    {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        gameKey: game.key,
+        configCSV,
+        contentCSV,
+        contentType
+      })
+    }
+  );
+
+  if (!res.ok) {
+    const text = await res.text();
+    console.error(text);
+    throw new Error("Save failed");
+  }
+}
+
 // For Admins Panel
 async function saveAdminsToServer(admins) {
   const headers = [

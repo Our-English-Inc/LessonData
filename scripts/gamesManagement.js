@@ -1,7 +1,7 @@
 (() => {
   //#region ====== Variables ======
 
-  let games = [];
+  let rvgames = [];
   let footer = null;
   let panelKeys = [];
   let panelKeySet = new Set();
@@ -390,7 +390,7 @@
 
     // Find game rows in current page
     const [start, end] = footer.getPageSlice();
-    const pageItems = games.slice(start, end);
+    const pageItems = rvgames.slice(start, end);
 
     // Create game rows
     pageItems.forEach((game, index) => {
@@ -420,14 +420,14 @@
 
     async function initGamesPage() {
       await loadGameElementRules();
-      games = await loadGamesFromCSV();
-      setupIndexUI({ gamesCount: games.length });
+      rvgames = await loadGamesFromCSV();
+      setupIndexUI({ gamesCount: rvgames.length });
 
       footer = createFooterController({
         onPageChange: drawGames
       });
 
-      footer.setTotalItems(games.length);
+      footer.setTotalItems(rvgames.length);
     }
 
     initGamesPage();
