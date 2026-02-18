@@ -4,6 +4,7 @@
 const modal = document.getElementById("action-modal");
 const modalTitle = document.getElementById("modal-title");
 const modalDesc = document.getElementById("modal-desc");
+const modalRequiredText = document.getElementById("modal-requiredText");
 const passwordInput = document.getElementById("modal-password");
 const awareCheckbox = document.getElementById("modal-aware");
 const confirmBtn = document.getElementById("modal-confirm");
@@ -259,7 +260,8 @@ function createFooterController({ onPageChange }) {
 function openActionModal({ title, desc, requiredText, onConfirm }) {
   // Initialization
   modalTitle.textContent = title;
-  modalDesc.textContent = desc + `\n\nType "${requiredText}" to confirm.`;
+  modalDesc.textContent = desc;
+  modalRequiredText.textContent = `Type "${requiredText}" to confirm.`;
   passwordInput.value = "";
   awareCheckbox.checked = false;
   confirmBtn.disabled = true;
