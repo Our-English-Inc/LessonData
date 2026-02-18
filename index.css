@@ -280,7 +280,7 @@ body {
   font-weight: 600;
 }
 
-.modal-desc {
+#modal-desc {
   font-size: 16px;
   line-height: 1.5;
   color: #555;
@@ -289,75 +289,33 @@ body {
 
 /*#endregion */
 
-/*#region ====== Password Input ====== */
+/*#region ====== Confirm Input ====== */
 
-.password-wrapper {
-  position: relative;
-  width: 100%;
-  height: 44px;
+.confirm-wrapper {
   margin-bottom: 16px;
 }
 
-.password-field {
-  position: absolute;
-  inset: 0;
+.confirm-field {
   width: 100%;
   height: 44px;
-
   font-size: 15px;
-  line-height: 44px;
-
-  padding: 0 44px 0 16px;
-
+  padding: 0 14px;
   border-radius: 8px;
   border: 1px solid #ccc;
-  background: #fff;
+  outline: none;
+  transition: border 0.2s, box-shadow 0.2s;
 }
 
-.password-field.is-hidden {
-  opacity: 0;
-  pointer-events: none;
+.confirm-field:focus {
+  border-color: var(--danger);
+  box-shadow: 0 0 0 2px rgba(229, 72, 77, 0.15);
 }
 
-/* Eye toggle */
-
-.toggle-password {
-  position: absolute;
-  right: 12px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 28px;
-  height: 28px;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
-
-  background: none;
-  border: none;
-  cursor: pointer;
-  opacity: 0.6;
-}
-
-.toggle-password:hover {
-  opacity: 1;
-}
-
-.toggle-password span {
-  font-size: 18px;
-  line-height: 1;
-}
-
-.toggle-password .icon-eye {
-  display: none;
-}
-
-.toggle-password[data-visible="true"] .icon-eye {
-  display: block;
-}
-
-.toggle-password[data-visible="true"] .icon-eye-off {
-  display: none;
+#modal-requiredText {
+  margin: 8px 0 16px;
+  font-weight: 600;
+  color: var(--danger);
+  font-size: 14px;
 }
 
 /*#endregion */
@@ -402,20 +360,6 @@ body {
 
 .modal-actions .danger:disabled {
   opacity: 0.4;
-}
-
-/*#endregion */
-
-/*#region ====== Errors ====== */
-
-.modal-error {
-  font-size: 12px;
-  color: var(--danger);
-  margin-bottom: 8px;
-}
-
-.modal-error.hidden {
-  display: none;
 }
 
 /*#endregion */
