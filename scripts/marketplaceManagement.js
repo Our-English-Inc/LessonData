@@ -213,7 +213,7 @@
     });
   }
 
-  window.syncContentWithLevels = function (levelCount, readonlyMode = true) {
+  window.syncMarketplaceContentWithLevels = function (levelCount, readonlyMode = true) {
     const container = document.getElementById("edit-content");
     if (!container) return;
 
@@ -303,7 +303,7 @@
           });
 
           renderEditorContent(contents, contentKeys);
-          syncContentWithLevels(draftData.levels);
+          syncMarketplaceContentWithLevels(draftData.levels);
         }
       });
     };
@@ -370,7 +370,7 @@
       });
 
       renderEditorContent(contents, contentKeys, true);
-      syncContentWithLevels(game.levels);
+      syncMarketplaceContentWithLevels(game.levels);
     };
 
     // "Active" Switch
