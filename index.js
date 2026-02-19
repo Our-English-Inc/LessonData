@@ -375,17 +375,22 @@ function openEditModal({ title, data, fields, onSave, readonlyMode = false }) {
       input.value = draftData[field.key] ?? "";
       
       if (field.key === "levels") {
-        input.oninput = e => {
-          const onLevelChange = e => {
-            const v = Math.max(0, Number(e.target.value) || 0);
-            draftData.levels = v;
-            if (currentPanel === PANEL.GAMES) syncGameContentWithLevels(v);
-            else if (currentPanel === PANEL.MARKETPLACE) syncMarketplaceContentWithLevels(v);
-          };
+        const onLevelChange = e => {
+          const v = Math.max(0, Number(e.target.value) || 0);
+          draftData.levels = v;
 
-          input.oninput = onLevelChange;
-          input.onchange = onLevelChange;
-        }
+          const panelNow = getPanel();
+
+          if (panelNow === PANEL.GAMES && typeof syncGameContentWithLevels === "function") {
+            syncGameContentWithLevels(v);
+          } 
+          else if (panelNow === PANEL.MARKETPLACE && typeof syncMarketplaceContentWithLevels === "function") {
+            syncMarketplaceContentWithLevels(v);
+          }
+        };
+
+        input.oninput = onLevelChange;
+        input.onchange = onLevelChange;
       } else {
         input.oninput = e => {
           draftData[field.key] = e.target.value;
