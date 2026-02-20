@@ -118,7 +118,6 @@
         <div class="actions">
           <button class="action-btn edit gameEditBtn" title="Edit">✏️</button>
           <button class="action-btn restore gameRestoreBtn" title="Restore">🔄</button>
-          <button class="action-btn delete gameDeleteBtn" title="Delete">🗑️</button>
           <button class="action-btn view gameViewBtn" title="View">🔎</button>
         </div>
       </td>
@@ -169,6 +168,7 @@
 
       if (r.key === "active") field.type = "checkbox";
       if (r.key === "levels") field.type = "number";
+      if (r.key === "block_highlight") field.type = "checkbox";
 
       return field;
     });
@@ -399,7 +399,12 @@
             onSave: async (updatedGame) => {
               try {
                 await saveMarketplaceToServer(updatedGame, collectSelectedCSV());
+
+                mpgames = await loadMarketplaceFromCSV();
+
+                footer.setTotalItems(mpgames.length);
                 drawMarketplace();
+
                 showFooterMessage("✓ Saved to CSV");
               } catch (e) {
                 alert("Save failed. Check server.");
@@ -470,16 +475,16 @@
     };
 
     // "Delete" Button
-    row.querySelector(".delete").onclick = () => {
-      openActionModal({
-        title: "Delete Game",
-        desc: "This action cannot be undone. The deletion takes effect immediately.",
-        onConfirm: () => {
-          console.log("Delete", game.title);
-          //TODO
-        }
-      });
-    };
+    // row.querySelector(".delete").onclick = () => {
+    //   openActionModal({
+    //     title: "Delete Game",
+    //     desc: "This action cannot be undone. The deletion takes effect immediately.",
+    //     onConfirm: () => {
+    //       console.log("Delete", game.title);
+    //       //TODO
+    //     }
+    //   });
+    // };
 
     // "View" Button
     row.querySelector(".view").onclick = async() => {
@@ -514,7 +519,7 @@
       });
 
       renderEditorContent(contents, contentKeys, true);
-      syncMarketplaceContentWithLevels(game.levels);
+      syncMarketplaceContentWithLevels(game.levels, true);
     };
 
     // "Active" Switch
