@@ -277,8 +277,11 @@
         };
 
         label.appendChild(checkbox);
+
+        const startLesson = c * 5 + 1;
+        const endLesson = startLesson + 4;
         label.appendChild(
-          document.createTextNode(`Chapter ${c + 1}`)
+          document.createTextNode(`Lesson ${startLesson}-${endLesson}`)
         );
 
         row.appendChild(label);
