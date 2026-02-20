@@ -398,7 +398,10 @@
                 }
               });
 
-              draftData.savedMergedMap[level] = r.value || "";
+              // Remove "" outside string if any
+              let raw = r.value || "";
+              if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1);
+              draftData.savedMergedMap[level] = raw;
             });
           }
 
