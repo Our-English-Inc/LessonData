@@ -357,18 +357,38 @@ function openEditModal({ title, data, fields, onSave, readonlyMode = false }) {
 
       field.options.forEach(option => {
         const opt = document.createElement("option");
-        opt.value = option;
-        opt.textContent = option;
-        if (option === draftData[field.key]) {
-          opt.selected = true;
+
+        if (typeof option === "object") {
+          opt.value = option.value;
+          opt.textContent = option.label;
+
+          if (Number(option.value) === Number(draftData[field.key])) {
+            opt.selected = true;
+          }
+        } else {
+          opt.value = option;
+          opt.textContent = option;
+
+          if (option === draftData[field.key]) {
+            opt.selected = true;
+          }
         }
+
         input.appendChild(opt);
       });
 
       input.onchange = e => {
-        draftData[field.key] = e.target.value;
+        draftData[field.key] = Number(e.target.value);
+
+        if (typeof syncGameContentWithLevels === "function") {
+          syncGameContentWithLevels(draftData.levels);
+        }
       };
 
+      if (field.readonly || readonlyMode) {
+        input.disabled = true;
+        input.classList.add("readonly-field");
+      }
     } else {
       input = document.createElement("input");
       input.type = field.type || "text";

@@ -157,7 +157,26 @@
       };
 
       if (r.key === "active") field.type = "checkbox";
-      if (r.key === "levels") field.type = "number";
+
+      if (r.key === "eduLevel") {
+        field.type = "select";
+
+        const key = game.key;
+
+        if (key === "WordSplash" || key === "SentenceScramble") {
+          field.options = [
+            { value: 1, label: "Level 1 (Lesson 1–30)" },
+            { value: 3, label: "Level 3 (Lesson 61–90)" }
+          ];
+        }
+
+        if (key === "BubblePop" || key === "WordScramble") {
+          field.options = [
+            { value: 2, label: "Level 2 (Lesson 31–60)" },
+            { value: 4, label: "Level 4 (Lesson 91–120)" }
+          ];
+        }
+      }
 
       return field;
     });
@@ -217,16 +236,9 @@
     const container = document.getElementById("edit-content");
     if (!container) return;
 
-    // Preserve existing textarea edits before re-render
-    const existing = {};
-    container.querySelectorAll("textarea").forEach(t => {
-      const key = t.dataset.contentKey;
-      const level = Number(t.dataset.level);
-      if (!existing[key]) existing[key] = {};
-      existing[key][level] = t.value;
-    });
-
     container.innerHTML = "";
+
+    const allContentRows = draftData.content || [];
 
     currentContentKeys.forEach(({ key, label }) => {
       const block = document.createElement("div");
@@ -236,12 +248,16 @@
       h4.textContent = label;
       block.appendChild(h4);
 
-      for (let i = 1; i <= levelCount; i++) {
+      const eduLevel = Number(draftData.eduLevel || 1);
+      const startIndex = (eduLevel - 1) * 6 + 1;
+      const endIndex = startIndex + 5;
+
+      for (let i = startIndex; i <= endIndex; i++) {
         const row = document.createElement("div");
         row.className = "content-row";
         row.style.marginBottom = "18px";
 
-        // ===== Lesson header (title + toggle) =====
+        // ===== Lesson header =====
         const header = document.createElement("div");
         header.style.display = "flex";
         header.style.justifyContent = "space-between";
@@ -257,22 +273,19 @@
         lessonTitle.style.fontWeight = "600";
         lessonTitle.style.color = "#666";
         lessonTitle.style.margin = "0";
-        lessonTitle.style.padding = "0";
 
         const toggleBtn = document.createElement("button");
         toggleBtn.type = "button";
-        toggleBtn.textContent = "▾"; // expanded by default
+        toggleBtn.textContent = "▾";
         toggleBtn.style.border = "none";
         toggleBtn.style.background = "transparent";
         toggleBtn.style.fontSize = "16px";
         toggleBtn.style.cursor = "pointer";
-        toggleBtn.style.padding = "0 4px";
-        toggleBtn.style.lineHeight = "1";
 
         header.appendChild(lessonTitle);
         header.appendChild(toggleBtn);
 
-        // ===== Collapsible content =====
+        // ===== Content =====
         const contentWrapper = document.createElement("div");
         contentWrapper.style.marginTop = "6px";
 
@@ -280,8 +293,10 @@
         textarea.dataset.contentKey = key;
         textarea.dataset.level = i;
         textarea.rows = 3;
-        textarea.value = csvToTextarea(existing[key]?.[i]);
         textarea.style.width = "100%";
+
+        const rowData = allContentRows.find(r => Number(r.level) === i);
+        textarea.value = csvToTextarea(rowData?.value);
 
         const isSentenceScramble =
           window.currentEditingGameKey === "SentenceScramble";
@@ -290,20 +305,25 @@
           textarea.disabled = true;
         }
 
+        textarea.oninput = e => {
+          let existingRow = allContentRows.find(r => Number(r.level) === i);
+          if (existingRow) {
+            existingRow.value = textareaToCsv(e.target.value);
+          }
+        };
+
         contentWrapper.appendChild(textarea);
 
-        // ===== Collapse logic =====
+        // ===== Fold-textbox Button =====
         let collapsed = false;
-
         const toggle = () => {
           collapsed = !collapsed;
           contentWrapper.style.display = collapsed ? "none" : "block";
           toggleBtn.textContent = collapsed ? "▸" : "▾";
         };
 
-        // click header toggles (but don't toggle when clicking inside textarea)
         header.onclick = toggle;
-        toggleBtn.onclick = (e) => {
+        toggleBtn.onclick = e => {
           e.stopPropagation();
           toggle();
         };
@@ -350,7 +370,7 @@
 
           openEditModal({
             title: `Edit ${game.title}`,
-            data: game,
+            data: { ...game, content: contents["content"] },
             fields,
             onSave: async (updatedGame) => {
               try {
