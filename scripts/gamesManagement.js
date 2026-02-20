@@ -284,7 +284,10 @@
         textarea.value = csvToTextarea(existing[key]?.[i]);
         textarea.style.width = "100%";
 
-        if (readonlyMode) {
+        const isSentenceScramble =
+          window.currentEditingGameKey === "SentenceScramble";
+
+        if (!isSentenceScramble || readonlyMode) {
           textarea.disabled = true;
         }
 
@@ -343,6 +346,8 @@
             const rows = await loadGameContentCSV(game);
             if (rows) contents["content"] = rows;
           }
+
+          window.currentEditingGameKey = game.key;
 
           openEditModal({
             title: `Edit ${game.title}`,
@@ -416,6 +421,8 @@
           contents["content"] = rows;
         }
       }
+
+      window.currentEditingGameKey = game.key;
 
       openEditModal({
         title: `View ${game.title}`,
