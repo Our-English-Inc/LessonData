@@ -3,7 +3,8 @@ id,#,true,false,false,false
 version,Version Number,true,false,false,true
 title,Game Title,true,true,false,true
 active,Active,true,true,false,true
-levels,Levels,true,false,false,true
+eduLevel,Level,true,true,false,true
+levels,Levels,false,false,false,false
 updatedAt,Last Updated,true,false,false,false
 updatedBy,Updated By,true,false,false,false
 timer,Timer (seconds),false,true,false,true
