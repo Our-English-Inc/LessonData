@@ -32,11 +32,16 @@ body {
 /*#region ====== Header ====== */
 
 #header {
+  position: relative;
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
   padding: 8px 4px 16px;
   margin-bottom: 12px;
+}
+
+#header-title {
+  text-align: center;
 }
 
 #header-title h2 {
@@ -54,6 +59,10 @@ body {
 #panel-toggle {
   display: flex;
   align-items: center;
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
 }
 
 #panel-toggle-btn {
