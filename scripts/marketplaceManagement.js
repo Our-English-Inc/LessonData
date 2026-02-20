@@ -224,98 +224,90 @@
   }
 
   window.syncMarketplaceContentWithLevels = function (levelCount, readonlyMode = false) {
-  const container = document.getElementById("edit-content");
-  if (!container) return;
+    const container = document.getElementById("edit-content");
+    if (!container) return;
 
-  // 初始化结构
-  if (!draftData.chapterMap) draftData.chapterMap = {};
-  if (!draftData.savedMergedMap) draftData.savedMergedMap = {};
-  if (!draftData.previewDirty) draftData.previewDirty = {};
+    if (!draftData.chapterMap) draftData.chapterMap = {};
+    if (!draftData.savedMergedMap) draftData.savedMergedMap = {};
+    if (!draftData.previewDirty) draftData.previewDirty = {};
 
-  container.innerHTML = "";
+    container.innerHTML = "";
 
-  const chapterWrapper = document.createElement("div");
-  chapterWrapper.className = "chapter-sections";
+    const chapterWrapper = document.createElement("div");
+    chapterWrapper.className = "chapter-sections";
 
-  for (let i = 1; i <= levelCount; i++) {
+    for (let i = 1; i <= levelCount; i++) {
+      if (!draftData.chapterMap[i]) {
+        draftData.chapterMap[i] = [false, false, false, false, false, false];
+      }
 
-    // 保证每个 level 有 6 个章节布尔值
-    if (!draftData.chapterMap[i]) {
-      draftData.chapterMap[i] = [false, false, false, false, false, false];
+      const section = document.createElement("div");
+      section.className = "level-section";
+
+      const title = document.createElement("h4");
+      title.textContent = `Level ${i}`;
+      section.appendChild(title);
+
+      const previewTextarea = document.createElement("textarea");
+      previewTextarea.rows = 4;
+      previewTextarea.style.width = "100%";
+      previewTextarea.style.marginTop = "10px";
+      previewTextarea.readOnly = true;
+
+      const hasSavedValue =
+        draftData.savedMergedMap[i] !== undefined &&
+        draftData.savedMergedMap[i] !== null;
+
+      if (hasSavedValue && !draftData.previewDirty[i]) {
+        previewTextarea.value = draftData.savedMergedMap[i];
+      } else {
+        previewTextarea.value = generateLevelMergedString(i);
+      }
+
+      const row = document.createElement("div");
+      row.style.display = "flex";
+      row.style.gap = "20px";
+      row.style.marginBottom = "20px";
+
+      for (let c = 0; c < 6; c++) {
+        const label = document.createElement("label");
+        label.style.display = "flex";
+        label.style.alignItems = "center";
+        label.style.gap = "5px";
+
+        const checkbox = document.createElement("input");
+        checkbox.type = "checkbox";
+        checkbox.checked = draftData.chapterMap[i][c];
+        checkbox.disabled = readonlyMode;
+
+        checkbox.onchange = () => {
+          draftData.chapterMap[i][c] = checkbox.checked;
+          draftData.previewDirty[i] = true;
+
+          const merged = generateLevelMergedString(i);
+          previewTextarea.value = merged;
+
+          draftData.savedMergedMap[i] = merged;
+        };
+
+        label.appendChild(checkbox);
+
+        const startLesson = c * 5 + 1;
+        const endLesson = startLesson + 4;
+        label.appendChild(
+          document.createTextNode(`Lesson ${startLesson}-${endLesson}`)
+        );
+
+        row.appendChild(label);
+      }
+
+      section.appendChild(row);
+      section.appendChild(previewTextarea);
+      chapterWrapper.appendChild(section);
     }
 
-    const section = document.createElement("div");
-    section.className = "level-section";
-
-    const title = document.createElement("h4");
-    title.textContent = `Level ${i}`;
-    section.appendChild(title);
-
-    // ===== Preview Textarea =====
-    const previewTextarea = document.createElement("textarea");
-    previewTextarea.rows = 4;
-    previewTextarea.style.width = "100%";
-    previewTextarea.style.marginTop = "10px";
-    previewTextarea.readOnly = true;
-
-    // ⭐ 关键逻辑：优先使用已保存值
-    const hasSavedValue =
-      draftData.savedMergedMap[i] !== undefined &&
-      draftData.savedMergedMap[i] !== null;
-
-    if (hasSavedValue && !draftData.previewDirty[i]) {
-      previewTextarea.value = draftData.savedMergedMap[i];
-    } else {
-      previewTextarea.value = generateLevelMergedString(i);
-    }
-
-    // ===== Checkbox Row =====
-    const row = document.createElement("div");
-    row.style.display = "flex";
-    row.style.gap = "20px";
-    row.style.marginBottom = "20px";
-
-    for (let c = 0; c < 6; c++) {
-      const label = document.createElement("label");
-      label.style.display = "flex";
-      label.style.alignItems = "center";
-      label.style.gap = "5px";
-
-      const checkbox = document.createElement("input");
-      checkbox.type = "checkbox";
-      checkbox.checked = draftData.chapterMap[i][c];
-      checkbox.disabled = readonlyMode;
-
-      checkbox.onchange = () => {
-        draftData.chapterMap[i][c] = checkbox.checked;
-
-        // 标记为用户修改过
-        draftData.previewDirty[i] = true;
-
-        const merged = generateLevelMergedString(i);
-        previewTextarea.value = merged;
-
-        draftData.savedMergedMap[i] = merged;
-      };
-
-      label.appendChild(checkbox);
-
-      const startLesson = c * 5 + 1;
-      const endLesson = startLesson + 4;
-      label.appendChild(
-        document.createTextNode(`Lesson ${startLesson}-${endLesson}`)
-      );
-
-      row.appendChild(label);
-    }
-
-    section.appendChild(row);
-    section.appendChild(previewTextarea);
-    chapterWrapper.appendChild(section);
-  }
-
-  container.appendChild(chapterWrapper);
-};
+    container.appendChild(chapterWrapper);
+  };
 
   function generateLevelMergedString(level) {
     if (!draftData.chapterMap || !draftData.contentMap) return "";

@@ -213,7 +213,7 @@
     });
   }
 
-  window.syncGameContentWithLevels = function (levelCount, readonlyMode = true) {
+  window.syncGameContentWithLevels = function (levelCount, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
 
@@ -303,7 +303,7 @@
           });
 
           renderEditorContent(contents, contentKeys);
-          syncGameContentWithLevels(draftData.levels);
+          syncGameContentWithLevels(draftData.levels, false);
         }
       });
     };
@@ -368,7 +368,7 @@
       });
 
       renderEditorContent(contents, contentKeys, true);
-      syncGameContentWithLevels(game.levels);
+      syncGameContentWithLevels(game.levels, true);
     };
 
     // "Active" Switch
