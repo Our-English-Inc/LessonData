@@ -299,6 +299,28 @@
         const rowData = allContentRows.find(r => Number(r.level) === i);
         textarea.value = csvToTextarea(rowData?.value);
 
+        // Split paragraph to sentences
+        if (editingTarget?.key?.toLowerCase().includes("sentence")) {
+          textarea.addEventListener("paste", function () {
+            setTimeout(() => {
+              const formatted = splitSentencesSmart(textarea.value);
+              textarea.value = formatted;
+            }, 0);
+          });
+          
+          textarea.addEventListener("input", function (e) {
+            if (!e.inputType || e.inputType !== "insertText") return;
+            if (!e.data || !/\s/.test(e.data)) return;
+
+            const value = textarea.value;
+
+            if (/[.!?。！？…]\s$/.test(value)) {
+              textarea.value = value.replace(/\s$/, "\n");
+              textarea.selectionStart = textarea.selectionEnd = textarea.value.length;
+            }
+          });
+        }
+
         const isSentenceScramble =
           window.currentEditingGameKey === "SentenceScramble";
 

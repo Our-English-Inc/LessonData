@@ -488,6 +488,18 @@ async function loadCSV(url) {
   });
 }
 
+function splitSentencesSmart(text) {
+  if (!text) return "";
+
+  return text
+    .replace(/\r\n/g, " ")
+    .replace(/\n/g, " ")
+    .split(/(?<=[.!?。！？…])\s+/)
+    .map(s => s.trim())
+    .filter(s => s.length > 0)
+    .join("\n");
+}
+
 function csvToTextarea(value) {
   return (value || "")
     .replace(/;\s*/g, "\n")
