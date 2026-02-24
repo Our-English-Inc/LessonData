@@ -6,6 +6,7 @@
   let panelKeys = [];
   let panelKeySet = new Set();
   let currentContentKeys = [];
+  let gamesController = null;
 
   //#endregion
 
@@ -406,10 +407,10 @@
               try {
                 await saveGamesToServer(updatedGame);
 
-                rvgames = await loadGamesFromCSV();
-
-                footer.setTotalItems(rvgames.length);
-                drawGames();
+                await gamesController.reloadAndRedraw(async () => {
+                  rvgames = await loadGamesFromCSV();
+                  return rvgames;
+                });
 
                 showFooterMessage("✓ Saved to CSV");
               } catch (e) {
@@ -499,32 +500,6 @@
     }
   }
 
-  // Draw 
-  function drawGames() {
-    const tbody = document.getElementById("item-tbody");
-    tbody.innerHTML = "";
-
-    // Find game rows in current page
-    const [start, end] = footer.getPageSlice();
-    const pageItems = rvgames.slice(start, end);
-
-    // Create game rows
-    pageItems.forEach((game, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = renderGamesRow(game, start + index);
-      bindGamesInteractiveUI(tr, game);
-      tbody.appendChild(tr); 
-    })
-
-    // Update UI
-    updateGameCount();
-
-    // Set button visibilities based on admin roles
-    if (window.currentRole) {
-      applyPermissions(window.currentRole);
-    }
-  }
-
   //#endregion
 
   // ====== Init ======
@@ -535,15 +510,23 @@
     if (panel !== PANEL.GAMES) return;
 
     async function initGamesPage() {
-      await loadGameElementRules();
-      rvgames = await loadGamesFromCSV();
-      setupIndexUI({ gamesCount: rvgames.length });
-
-      footer = createFooterController({
-        onPageChange: drawGames
+      gamesController = createPanelController({
+        panelName: "games",
+        loadRules: async () => {
+          await loadGameElementRules();
+        },
+        loadData: async () => {
+          rvgames = await loadGamesFromCSV();
+          return rvgames;
+        },
+        drawRow: (game, index) => renderGamesRow(game, index),
+        bindRowUI: (tr, game) => bindGamesInteractiveUI(tr, game),
+        onAfterDraw: () => {
+          // Save space for future functions
+        }
       });
 
-      footer.setTotalItems(rvgames.length);
+      await gamesController.init({ gamesCount: (await loadGamesFromCSV()).length });
     }
 
     initGamesPage();

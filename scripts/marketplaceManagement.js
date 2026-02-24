@@ -6,6 +6,7 @@
   let panelKeys = [];
   let panelKeySet = new Set();
   let currentContentKeys = [];
+  let marketplaceController = null;
 
   //#endregion
 
@@ -402,10 +403,10 @@
               try {
                 await saveMarketplaceToServer(updatedGame, collectSelectedCSV());
 
-                mpgames = await loadMarketplaceFromCSV();
-
-                footer.setTotalItems(mpgames.length);
-                drawMarketplace();
+                await marketplaceController.reloadAndRedraw(async () => {
+                  mpgames = await loadMarketplaceFromCSV();
+                  return mpgames;
+                });
 
                 showFooterMessage("✓ Saved to CSV");
               } catch (e) {
@@ -466,8 +467,10 @@
         onConfirm: async () => {
           try {
             await restoreCSV(`marketplace/${game.key}`);
-            mpgames = await loadMarketplaceFromCSV();
-            drawMarketplace();
+            await marketplaceController.reloadAndRedraw(async () => {
+              mpgames = await loadMarketplaceFromCSV();
+              return mpgames;
+            });
             showFooterMessage("✓ Restored to Safe Version");
           } catch (e) {
             alert("Restore failed. Check server.");
@@ -534,32 +537,6 @@
     }
   }
 
-  // Draw 
-  function drawMarketplace() {
-    const tbody = document.getElementById("item-tbody");
-    tbody.innerHTML = "";
-
-    // Find game rows in current page
-    const [start, end] = footer.getPageSlice();
-    const pageItems = mpgames.slice(start, end);
-
-    // Create game rows
-    pageItems.forEach((game, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = renderMarketplaceRow(game, start + index);
-      bindMarketplaceInteractiveUI(tr, game);
-      tbody.appendChild(tr); 
-    })
-
-    // Update UI
-    updateMarketplaceCount();
-
-    // Set button visibilities based on admin roles
-    if (window.currentRole) {
-      applyPermissions(window.currentRole);
-    }
-  }
-
   //#endregion
 
   // ====== Init ======
@@ -570,15 +547,22 @@
     if (panel !== PANEL.MARKETPLACE) return;
 
     async function initMarketplacePage() {
-      await loadMarketplaceElementRules();
-      mpgames = await loadMarketplaceFromCSV();
-      setupIndexUI({ marketplaceCount: mpgames.length });
-
-      footer = createFooterController({
-        onPageChange: drawMarketplace
+      marketplaceController = createPanelController({
+        panelName: "marketplace",
+        loadRules: async () => {
+          await loadMarketplaceElementRules();
+        },
+        loadData: async () => {
+          mpgames = await loadMarketplaceFromCSV();
+          return mpgames;
+        },
+        drawRow: (game, index) => renderMarketplaceRow(game, index),
+        bindRowUI: (tr, game) => bindMarketplaceInteractiveUI(tr, game),
+        onAfterDraw: () => {
+        }
       });
 
-      footer.setTotalItems(mpgames.length);
+      await marketplaceController.init({marketplaceCount: mpgames.length});
     }
 
     initMarketplacePage();

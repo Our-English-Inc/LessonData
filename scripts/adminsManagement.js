@@ -5,6 +5,7 @@
 
   let admins = [];
   let footer = null;
+  let adminsController = null;
 
   //#endregion
 
@@ -181,24 +182,6 @@
     };
   }
 
-  // Draw
-  function drawAdmins() {
-    const tbody = document.getElementById("item-tbody");
-    tbody.innerHTML = "";
-
-    const [start, end] = footer.getPageSlice();
-    const pageItems = admins.slice(start, end);
-
-    pageItems.forEach((admin, index) => {
-      const tr = document.createElement("tr");
-      tr.innerHTML = renderAdminRow(admin, start + index);
-      bindInteractiveUI(tr, admin);
-      tbody.appendChild(tr);
-    });
-
-    updateAdminCount();
-  }
-
   //#endregion
 
   // ====== Init ======
@@ -209,14 +192,19 @@
     if (panel !== PANEL.ADMINS) return;
 
     async function initAdminsPage() {
-      admins = await loadAdminsFromCSV();
-      setupIndexUI({ adminsCount: admins.length });
-
-      footer = createFooterController({
-        onPageChange: drawAdmins
+      adminsController = createPanelController({
+        panelName: "admins",
+        loadRules: null,
+        loadData: async () => {
+          admins = await loadAdminsFromCSV();
+          return admins;
+        },
+        drawRow: (admin, index) => renderAdminRow(admin, index),
+        bindRowUI: (tr, admin) => bindInteractiveUI(tr, admin),
+        onAfterDraw: null
       });
 
-      footer.setTotalItems(admins.length);
+      await adminsController.init({adminsCount: admins.length});
     }
 
     initAdminsPage();

@@ -138,7 +138,7 @@ function applyPermissions(role) {
 
 //#endregion
 
-//#region ====== Panel Switch ======
+//#region ====== Panels ======
 
 // Detect current panel
 function getPanel() {
@@ -207,6 +207,73 @@ function setupIndexUI({ gamesCount = 0, adminsCount = 0, marketplaceCount = 0 })
   };
 
   return panel;
+}
+
+// Create panel
+function createPanelController({
+  panelName,
+  loadRules,
+  loadData,
+  drawRow,
+  bindRowUI,
+  onAfterDraw
+}) {
+  let items = [];
+  let footer = null;
+
+  function updateCount() {
+    const countEl = document.getElementById("item-count");
+    if (countEl) {
+      countEl.textContent = `(${items.length})`;
+    }
+  }
+
+  function draw() {
+    const tbody = document.getElementById("item-tbody");
+    tbody.innerHTML = "";
+
+    const [start, end] = footer.getPageSlice();
+    const pageItems = items.slice(start, end);
+
+    pageItems.forEach((item, index) => {
+      const tr = document.createElement("tr");
+      tr.innerHTML = drawRow(item, start + index);
+      bindRowUI(tr, item);
+      tbody.appendChild(tr);
+    });
+
+    updateCount();
+
+    if (window.currentRole) {
+      applyPermissions(window.currentRole);
+    }
+
+    if (onAfterDraw) {
+      onAfterDraw({ items, footer });
+    }
+  }
+
+  async function init(setupCountsObj) {
+    if (loadRules) await loadRules();
+
+    items = await loadData();
+
+    setupIndexUI(setupCountsObj);
+
+    footer = createFooterController({
+      onPageChange: draw
+    });
+
+    footer.setTotalItems(items.length);
+  }
+
+  async function reloadAndRedraw(loadFn) {
+    items = await (loadFn ? loadFn() : loadData());
+    footer.setTotalItems(items.length);
+    draw();
+  }
+
+  return { init, draw, reloadAndRedraw };
 }
 
 //#endregion
