@@ -152,7 +152,7 @@
       };
 
       if (r.key === "active") field.type = "checkbox";
-      if (r.key === "levels") field.type = "number";
+      if (r.key === "rounds") field.type = "number";
       if (r.key === "block_highlight") field.type = "checkbox";
 
       return field;
@@ -182,14 +182,14 @@
       block.appendChild(h4);
 
       rows.forEach(r => {
-        const level = Number(r.level);
+        const round = Number(r.round);
 
         const rowDiv = document.createElement("div");
         rowDiv.className = "content-row";
 
         const textarea = document.createElement("textarea");
         textarea.dataset.contentKey = key;
-        textarea.dataset.level = r.level;
+        textarea.dataset.round = r.round;
         textarea.rows = 3;
         textarea.value = csvToTextarea(r.value);
 
@@ -198,7 +198,7 @@
           textarea.classList.add("readonly-field");
         }
 
-        rowDiv.appendChild(document.createElement("div")).textContent = `Level ${level}`;
+        rowDiv.appendChild(document.createElement("div")).textContent = `Round ${round}`;
         rowDiv.appendChild(textarea);
 
         block.appendChild(rowDiv);
@@ -208,7 +208,7 @@
     });
   }
 
-  window.syncMarketplaceContentWithLevels = function (levelCount, readonlyMode = false) {
+  window.syncMarketplaceContentWithRounds = function (roundCount, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
 
@@ -221,13 +221,13 @@
     const chapterWrapper = document.createElement("div");
     chapterWrapper.className = "chapter-sections";
 
-    for (let i = 1; i <= levelCount; i++) {
+    for (let i = 1; i <= roundCount; i++) {
       if (!draftData.chapterMap[i]) {
         draftData.chapterMap[i] = [false, false, false, false, false, false];
       }
 
       const section = document.createElement("div");
-      section.className = "level-section";
+      section.className = "round-section";
       section.style.marginBottom = "25px";
 
       const header = document.createElement("div");
@@ -237,7 +237,7 @@
       header.style.cursor = "pointer";
 
       const title = document.createElement("h4");
-      title.textContent = `Level ${i}`;
+      title.textContent = `Round ${i}`;
       title.style.margin = "0";
 
       const toggleBtn = document.createElement("button");
@@ -267,7 +267,7 @@
         );
       } else {
         previewTextarea.value = formatMarketplacePreview(
-          generateLevelMergedString(i)
+          generateRoundMergedString(i)
         );
       }
 
@@ -291,7 +291,7 @@
           draftData.chapterMap[i][c] = checkbox.checked;
           draftData.previewDirty[i] = true;
 
-          const merged = generateLevelMergedString(i);
+          const merged = generateRoundMergedString(i);
           previewTextarea.value = formatMarketplacePreview(merged);
 
           draftData.savedMergedMap[i] = merged;
@@ -330,10 +330,10 @@
     container.appendChild(chapterWrapper);
   };
 
-  function generateLevelMergedString(level) {
+  function generateRoundMergedString(round) {
     if (!draftData.chapterMap || !draftData.contentMap) return "";
 
-    const selectedChapters = draftData.chapterMap[level] || [];
+    const selectedChapters = draftData.chapterMap[round] || [];
     let merged = [];
 
     selectedChapters.forEach((checked, index) => {
@@ -348,22 +348,22 @@
   }
 
   function collectSelectedCSV() {
-    if (!draftData.chapterMap) return "level,selected,value\n";
+    if (!draftData.chapterMap) return "round,selected,value\n";
 
     const rows = [];
 
-    for (let level = 1; level <= draftData.levels; level++) {
-      const arr = draftData.chapterMap[level] || [false, false, false, false, false, false];
+    for (let round = 1; round <= draftData.rounds; round++) {
+      const arr = draftData.chapterMap[round] || [false, false, false, false, false, false];
       const selected = arr
         .map((checked, index) => checked ? index + 1 : null)
         .filter(Boolean)
         .join("|");
 
-      const merged = generateLevelMergedString(level);
-      rows.push(`${level},${selected},"${merged}"`);
+      const merged = generateRoundMergedString(round);
+      rows.push(`${round},${selected},"${merged}"`);
     }
 
-    return "level,selected,value\n" + rows.join("\n");
+    return "round,selected,value\n" + rows.join("\n");
   }
 
 
@@ -406,24 +406,24 @@
             draftData.savedMergedMap = {};
 
             selectedRows.forEach(r => {
-              const level = Number(r.level);
+              const round = Number(r.round);
               const selectedArr = (r.selected || "")
                 .split("|")
                 .map(n => Number(n));
 
-              draftData.chapterMap[level] =
+              draftData.chapterMap[round] =
                 [false, false, false, false, false, false];
 
               selectedArr.forEach(ch => {
                 if (ch >= 1 && ch <= 6) {
-                  draftData.chapterMap[level][ch - 1] = true;
+                  draftData.chapterMap[round][ch - 1] = true;
                 }
               });
 
               // Remove "" outside string if any
               let raw = r.value || "";
               if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1);
-              draftData.savedMergedMap[level] = raw;
+              draftData.savedMergedMap[round] = raw;
             });
           }
 
@@ -438,7 +438,7 @@
             });
           }
 
-          syncMarketplaceContentWithLevels(draftData.levels);
+          syncMarketplaceContentWithRounds(draftData.rounds);
         }
       });
     };
@@ -508,7 +508,7 @@
       });
 
       renderEditorContent(contents, contentKeys, true);
-      syncMarketplaceContentWithLevels(game.levels, true);
+      syncMarketplaceContentWithRounds(game.rounds, true);
     };
 
     // "Active" Switch

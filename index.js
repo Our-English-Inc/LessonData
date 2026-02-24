@@ -59,28 +59,30 @@ let pendingAction = null;
 
 //#region ====== Login ======
 
+// Check if current user is logged in using Azure Function
 async function checkLogin() {
   try {
     const res = await fetch(
       `${FUNCTION_BASE}/api/getCurrentUser`,
-      { credentials: "include" }
+      { credentials: "include" } // Send cookies
     );
 
-    if (!res.ok) {
-      const redirect = encodeURIComponent(window.location.href);
+    if (!res.ok) { // res.ok means HTTP 200-209, if not means not logged in
+      const redirect = encodeURIComponent(window.location.href); // Make web jump back after log in
 
       window.location.href =
         `${FUNCTION_BASE}/.auth/login/aad?post_login_redirect_uri=${encodeURIComponent(
           FUNCTION_BASE + "/api/loginRedirect?target=" + redirect
-        )}`;
+        )}`; // log in portal of Azure Static Web App
     }
 
+    // Get user email and admin role
     const user = await res.json();
     window.currentUser = user;
-
     const role = await determineUserRole(user);
     window.currentRole = role;
 
+    // Ban unauthorized users
     if (!role) {
       alert("You are not authorized.");
       return;
@@ -89,6 +91,7 @@ async function checkLogin() {
     console.log("User:", user);
     console.log("Role:", role);
 
+    // Update UI according to admin level
     applyPermissions(role);
   } catch (err) {
     console.error("Login check failed:", err);

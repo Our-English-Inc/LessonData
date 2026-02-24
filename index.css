@@ -65,7 +65,7 @@ body {
   transform: translateY(-50%);
 }
 
-#panel-toggle-btn {
+.panel-toggle-btn {
   padding: 6px 12px;
   font-size: 13px;
   border-radius: 6px;
@@ -74,7 +74,7 @@ body {
   cursor: pointer;
 }
 
-#panel-toggle-btn:hover {
+.panel-toggle-btn:hover {
   background: #f4f5f9;
 }
 
@@ -129,8 +129,7 @@ body {
   font-size: 14px;
 }
 
-.action-btn.edit,
-.action-btn.copy {
+.action-btn.edit {
   color: var(--accent);
 }
 
