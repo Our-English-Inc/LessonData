@@ -129,7 +129,10 @@
             onSave: async () => {
               try {
                 await saveAdminsToServer(admins);
-                drawAdmins();
+                await adminsController.reloadAndRedraw(async () => {
+                  admins = await loadAdminsFromCSV();
+                  return admins;
+                });
                 showFooterMessage?.("✓ Saved to CSV");
               } catch (e) {
                 alert("Save failed. Check server.");
