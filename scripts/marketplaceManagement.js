@@ -246,35 +246,25 @@
         draftData.chapterMap[i] = [false, false, false, false, false, false];
       }
 
+      // Create header elements
       const section = document.createElement("div");
       section.className = "round-section";
-      section.style.marginBottom = "25px";
-
       const header = document.createElement("div");
-      header.style.display = "flex";
-      header.style.justifyContent = "space-between";
-      header.style.alignItems = "center";
-      header.style.cursor = "pointer";
-
+      header.className = "round-header"
       const title = document.createElement("h4");
       title.textContent = `Round ${i}`;
-      title.style.margin = "0";
-
       const toggleBtn = document.createElement("button");
       toggleBtn.textContent = "▾";
-      toggleBtn.style.border = "none";
-      toggleBtn.style.background = "transparent";
-      toggleBtn.style.fontSize = "16px";
-      toggleBtn.style.cursor = "pointer";
+      toggleBtn.className = "round-toggle";
 
       header.appendChild(title);
       header.appendChild(toggleBtn);
       section.appendChild(header);
 
+      // Create text box
       const previewTextarea = document.createElement("textarea");
+      previewTextarea.className = "round-preview";
       previewTextarea.rows = 4;
-      previewTextarea.style.width = "100%";
-      previewTextarea.style.marginTop = "10px";
       previewTextarea.readOnly = true;
 
       const hasSavedValue =
@@ -291,16 +281,12 @@
         );
       }
 
+      // Create chapter checkbox
       const row = document.createElement("div");
-      row.style.display = "flex";
-      row.style.gap = "20px";
-      row.style.marginBottom = "20px";
+      row.className = "chapter-checkbox-row";
 
       for (let c = 0; c < 6; c++) {
         const label = document.createElement("label");
-        label.style.display = "flex";
-        label.style.alignItems = "center";
-        label.style.gap = "5px";
 
         const checkbox = document.createElement("input");
         checkbox.type = "checkbox";
@@ -328,20 +314,21 @@
         row.appendChild(label);
       }
 
+      // Create folding
       const contentWrapper = document.createElement("div");
+      contentWrapper.className = "round-content";
       contentWrapper.appendChild(row);
       contentWrapper.appendChild(previewTextarea);
 
       section.appendChild(contentWrapper);
 
       let collapsed = true;
-      contentWrapper.style.display = "none";
       toggleBtn.textContent = "▸";
 
       header.onclick = () => {
         collapsed = !collapsed;
 
-        contentWrapper.style.display = collapsed ? "none" : "block";
+        contentWrapper.classList.toggle("open");
         toggleBtn.textContent = collapsed ? "▸" : "▾";
       };
       chapterWrapper.appendChild(section);
@@ -372,40 +359,28 @@
         draftData.roundMap[round] = { selectedLessons: [] };
       }
 
+      // Create header elements
       const section = document.createElement("div");
       section.className = "round-section";
-      section.style.marginBottom = "25px";
-
-      // header
       const header = document.createElement("div");
-      header.style.display = "flex";
-      header.style.justifyContent = "space-between";
-      header.style.alignItems = "center";
-      header.style.cursor = "pointer";
-
+      header.className = "round-header";
       const title = document.createElement("h4");
       title.textContent = `Round ${round}`;
-      title.style.margin = "0";
-
       const toggleBtn = document.createElement("button");
       toggleBtn.textContent = "▸";
-      toggleBtn.style.border = "none";
-      toggleBtn.style.background = "transparent";
-      toggleBtn.style.fontSize = "16px";
-      toggleBtn.style.cursor = "pointer";
+      toggleBtn.className = "round-toggle";
 
       header.appendChild(title);
       header.appendChild(toggleBtn);
       section.appendChild(header);
 
       const contentWrapper = document.createElement("div");
-      contentWrapper.style.display = "none";
+      contentWrapper.className = "round-content";
 
-      // preview
+      // Create text box
       const previewTextarea = document.createElement("textarea");
       previewTextarea.rows = 4;
-      previewTextarea.style.width = "100%";
-      previewTextarea.style.marginTop = "10px";
+      previewTextarea.className = "round-preview";
       previewTextarea.readOnly = true;
 
       const hasSaved = draftData.savedMergedMap[round] !== undefined && draftData.savedMergedMap[round] !== null;
@@ -418,21 +393,12 @@
       // build level blocks
       LEVELS.forEach(level => {
         const levelBlock = document.createElement("div");
-        levelBlock.style.border = "1px solid #ddd";
-        levelBlock.style.borderRadius = "8px";
-        levelBlock.style.padding = "10px";
-        levelBlock.style.marginTop = "10px";
-
+        levelBlock.className = "level-block";
         const levelHeader = document.createElement("div");
-        levelHeader.style.display = "flex";
-        levelHeader.style.justifyContent = "space-between";
-        levelHeader.style.alignItems = "center";
-        levelHeader.style.cursor = "pointer";
-        levelHeader.style.marginBottom = "8px";
-
+        levelHeader.className = "level-header";
         const levelTitle = document.createElement("div");
         levelTitle.textContent = `Lv ${level}`;
-        levelTitle.style.fontWeight = "600";
+        levelTitle.className = "level-title";
 
         const levelToggle = document.createElement("span");
         levelToggle.textContent = "▸";
@@ -442,11 +408,11 @@
         levelBlock.appendChild(levelHeader);
 
         const levelContentWrapper = document.createElement("div");
-        levelContentWrapper.style.display = "none";
+        levelContentWrapper.className = "level-content";
 
         levelHeader.onclick = () => {
-          const isOpen = levelContentWrapper.style.display === "block";
-          levelContentWrapper.style.display = isOpen ? "none" : "block";
+          levelContentWrapper.classList.toggle("open");
+          const isOpen = levelContentWrapper.classList.contains("open");
           levelToggle.textContent = isOpen ? "▸" : "▾";
         };
 
@@ -454,15 +420,9 @@
           const end = start + GROUP_SIZE - 1;
 
           const groupHeader = document.createElement("div");
-          groupHeader.style.display = "flex";
-          groupHeader.style.justifyContent = "space-between";
-          groupHeader.style.alignItems = "center";
-          groupHeader.style.cursor = "pointer";
-          groupHeader.style.marginBottom = "6px";
-
+          groupHeader.className = "lesson-group-header";
           const groupTitle = document.createElement("div");
           groupTitle.textContent = `L${start}-${end}`;
-
           const groupToggle = document.createElement("span");
           groupToggle.textContent = "▸";
 
@@ -470,8 +430,8 @@
           groupHeader.appendChild(groupToggle);
 
           groupHeader.onclick = () => {
-            const isOpen = lessonRow.style.display === "block";
-            lessonRow.style.display = isOpen ? "none" : "block";
+            lessonRow.classList.toggle("open");
+            const isOpen = lessonRow.classList.contains("open");
             groupToggle.textContent = isOpen ? "▸" : "▾";
           };
 
@@ -483,18 +443,12 @@
 
           // lesson checkbox row (hidden by default)
           const lessonRow = document.createElement("div");
-          lessonRow.style.display = "none";
-          lessonRow.style.marginLeft = "24px";
-          lessonRow.style.marginBottom = "10px";
+          lessonRow.className = "lesson-group-row";
 
           for (let l = start; l <= end; l++) {
             const code = makeLessonCode(level, l);
 
             const label = document.createElement("label");
-            label.style.display = "inline-flex";
-            label.style.alignItems = "center";
-            label.style.gap = "6px";
-            label.style.marginRight = "12px";
 
             const cb = document.createElement("input");
             cb.type = "checkbox";
@@ -533,11 +487,10 @@
       contentWrapper.appendChild(previewTextarea);
       section.appendChild(contentWrapper);
 
-      let collapsed = true;
       header.onclick = () => {
-        collapsed = !collapsed;
-        contentWrapper.style.display = collapsed ? "none" : "block";
-        toggleBtn.textContent = collapsed ? "▸" : "▾";
+        contentWrapper.classList.toggle("open");
+        const isOpen = contentWrapper.classList.contains("open");
+        toggleBtn.textContent = isOpen ? "▾" : "▸";
       };
 
       wrapper.appendChild(section);
