@@ -108,11 +108,6 @@
     return { level, lesson };
   }
 
-  function ensureDeletedMaps(round) {
-    if (!draftData.deletedByLesson) draftData.deletedByLesson = {};
-    if (!draftData.deletedByLesson[round]) draftData.deletedByLesson[round] = {};
-  }
-
   function getLessonWords(level, lesson) {
     const raw = (draftData.lessonContentMap?.[level]?.[lesson] || "").trim();
     if (!raw) return [];
@@ -123,35 +118,8 @@
       .filter(Boolean);
   }
 
-  // Returns tokens: [{ lessonCode, idx, word }]
-  function getRoundTokens(round) {
-    const selected = draftData.roundMap?.[round]?.selectedLessons || [];
-    const tokens = [];
-
-    selected.forEach(lessonCode => {
-      const parsed = parseLessonCode(lessonCode);
-      if (!parsed) return;
-
-      const words = getLessonWords(parsed.level, parsed.lesson);
-      for (let i = 0; i < words.length; i++) {
-        tokens.push({ lessonCode, idx: i, word: words[i] });
-      }
-    });
-
-    return tokens;
-  }
-
-  function isTokenDeleted(round, token) {
-    ensureDeletedMaps(round);
-    const set = draftData.deletedByLesson[round][token.lessonCode];
-    return set ? set.has(token.idx) : false;
-  }
-
-  function buildMergedStringFromTokens(round) {
-    ensureDeletedMaps(round);
-    const tokens = getRoundTokens(round);
-    const kept = tokens.filter(t => !isTokenDeleted(round, t));
-    return kept.map(t => t.word).join("|");
+  function ensureRoundMergedValue() {
+    if (!draftData.roundMergedValue) draftData.roundMergedValue = {};
   }
 
   //#endregion
@@ -386,11 +354,8 @@
   window.syncMarketplaceContentWithRounds_lessonMerge = function(roundCount, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
-
     if (!draftData.roundMap) draftData.roundMap = {};
-    if (!draftData.savedMergedMap) draftData.savedMergedMap = {};
-    if (!draftData.previewDirty) draftData.previewDirty = {};
-
+    ensureRoundMergedValue();
     container.innerHTML = "";
 
     const wrapper = document.createElement("div");
@@ -429,21 +394,9 @@
       previewTextarea.className = "round-preview";
       previewTextarea.readOnly = true;
 
-      let visibleTokens = [];
-
       function renderPreview() {
-        if (draftData.savedMergedMap?.[round] && !draftData.previewDirty?.[round]) {
-          previewTextarea.value =
-            draftData.savedMergedMap[round]
-              .split("|")
-              .join("\n");
-          return;
-        }
-
-        const tokens = getRoundTokens(round).filter(t => !isTokenDeleted(round, t));
-        visibleTokens = tokens;
-
-        previewTextarea.value = tokens.map(t => t.word).join("\n");
+        const raw = draftData.roundMergedValue?.[round] || "";
+        previewTextarea.value = raw ? raw.split("|").join("\n") : "";
       }
 
       previewTextarea.ondblclick = () => {
@@ -465,27 +418,19 @@
         if (selStart === selEnd) return;
 
         e.preventDefault();
-        ensureDeletedMaps(round);
 
-        const v = previewTextarea.value;
+        const full = previewTextarea.value;
+        const lines = full.split("\n");
 
-        const startLine = v.slice(0, selStart).split("\n").length - 1;
-        const endLine = v.slice(0, selEnd).split("\n").length - 1;
+        const startLine = full.slice(0, selStart).split("\n").length - 1;
+        const endLine = full.slice(0, selEnd).split("\n").length - 1;
 
         const from = Math.min(startLine, endLine);
         const to = Math.max(startLine, endLine);
 
-        for (let i = from; i <= to; i++) {
-          const token = visibleTokens[i];
-          if (!token) continue;
+        lines.splice(from, to - from + 1);
 
-          if (!draftData.deletedByLesson[round][token.lessonCode]) {
-            draftData.deletedByLesson[round][token.lessonCode] = new Set();
-          }
-          draftData.deletedByLesson[round][token.lessonCode].add(token.idx);
-        }
-
-        draftData.previewDirty[round] = true;
+        draftData.roundMergedValue[round] = lines.join("|");
         renderPreview();
       };
 
@@ -571,30 +516,31 @@
             cb.checked = selectedSet.has(code);
 
             cb.onchange = () => {
-              const arr = draftData.roundMap[round].selectedLessons;
-              const set = new Set(arr);
-
-              ensureDeletedMaps(round);
+              const set = new Set(draftData.roundMap[round].selectedLessons);
 
               if (cb.checked) {
-                // re-check should pull ALL words again for this lesson
                 set.add(code);
-                // clear deletion overlay for this lesson (fresh)
-                delete draftData.deletedByLesson[round][code];
+
+                const parsed = parseLessonCode(code);
+                const words = parsed ? getLessonWords(parsed.level, parsed.lesson) : [];
+
+                const cur = draftData.roundMergedValue[round]
+                  ? draftData.roundMergedValue[round].split("|").filter(Boolean)
+                  : [];
+
+                draftData.roundMergedValue[round] = cur.concat(words).join("|");
               } else {
-                // uncheck removes its remaining words AND resets its deletion history
                 set.delete(code);
-                delete draftData.deletedByLesson[round][code];
+
+                draftData.roundMergedValue[round] = generateRoundMergedString_lessonMerge(round);
               }
 
-              draftData.roundMap[round].selectedLessons = Array.from(set).sort();
-
-              draftData.previewDirty[round] = true;
+              draftData.roundMap[round].selectedLessons =
+                Array.from(set).sort((a, b) => a.localeCompare(b));
 
               renderPreview();
 
-              // Update highlight
-              const hasGroup = groupCodes.some(code => set.has(code));
+              const hasGroup = groupCodes.some(c => set.has(c));
               groupHeader.classList.toggle("has-selection", hasGroup);
               updateLevelHighlight();
             };
@@ -694,7 +640,8 @@
 
     rounds.forEach(round => {
       const selected = (draftData.roundMap[round]?.selectedLessons || []).join("|");
-      const merged = buildMergedStringFromTokens(round);
+      ensureRoundMergedValue();
+      const merged = draftData.roundMergedValue?.[round] || "";
       rows.push(`${round},${selected},"${merged}"`);
     });
 
@@ -753,24 +700,22 @@
             // lessonMerge: selected.csv uses lesson codes like 1-01|3-02
             if (game.layout === "lessonMerge") {
               draftData.roundMap = {};
-              draftData.deletedByLesson = {};
-              draftData.savedMergedMap = {};
+              ensureRoundMergedValue();
+              draftData.roundMergedValue = {};
 
               selectedRows.forEach(r => {
                 const round = Number(r.round);
+
                 const selected = (r.selected || "")
                   .split("|")
                   .map(s => s.trim())
                   .filter(Boolean);
 
-                draftData.roundMap[round] = {
-                  selectedLessons: selected
-                };
+                draftData.roundMap[round] = { selectedLessons: selected };
 
                 let raw = r.value || "";
                 if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1);
-
-                draftData.savedMergedMap[round] = raw;
+                draftData.roundMergedValue[round] = raw;
               });
             } 
             // chapterMerge: keep old behavior
