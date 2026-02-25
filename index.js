@@ -694,7 +694,7 @@ async function saveMarketplaceToServer(game, selectedCSV) {
     ["version", game.version],
     ["title", game.title],
     ["active", game.active ? "true" : "false"],
-    ["levels", game.levels],
+    ["rounds", game.rounds],
     ["updatedAt", game.updatedAt || "1/1/2000"],
     ["updatedBy", game.updatedBy || "testuser"],
     ["lightning_timer", game.lightning_timer || 90],
