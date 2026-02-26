@@ -436,6 +436,16 @@
       };
 
       renderPreview();
+      
+      // Two columns
+      const layoutRow = document.createElement("div");
+      layoutRow.className = "round-layout-row";
+
+      const leftPanel = document.createElement("div");
+      leftPanel.className = "round-left-panel";
+
+      const rightPanel = document.createElement("div");
+      rightPanel.className = "round-right-panel";
 
       LEVELS.forEach(level => {
         const levelBlock = document.createElement("div");
@@ -569,11 +579,14 @@
         }
         
         levelBlock.appendChild(levelContentWrapper);
-        contentWrapper.appendChild(levelBlock);
+        leftPanel.appendChild(levelBlock);
         updateLevelHighlight();
       });
 
-      contentWrapper.appendChild(previewTextarea);
+      rightPanel.appendChild(previewTextarea);
+      layoutRow.appendChild(leftPanel);
+      layoutRow.appendChild(rightPanel);
+      contentWrapper.appendChild(layoutRow);
       section.appendChild(contentWrapper);
 
       header.onclick = () => {
