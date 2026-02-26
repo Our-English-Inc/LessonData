@@ -464,23 +464,28 @@ function openEditModal({ title, data, fields, onSave, readonlyMode = false }) {
       input.type = field.type || "text";
       input.value = draftData[field.key] ?? "";
       
-      if (field.key === "levels") {
-        const onLevelChange = e => {
-          const v = Math.max(0, Number(e.target.value) || 0);
-          draftData.levels = v;
+      if (field.key === "levels" || field.key === "rounds") {
+        const onChange = e => {
+        const v = Math.max(0, Number(e.target.value) || 0);
+        draftData[field.key] = v;
 
-          const panelNow = getPanel();
+        const panelNow = getPanel();
 
-          if (panelNow === PANEL.GAMES && typeof syncGameContentWithLevels === "function") {
-            syncGameContentWithLevels(v);
-          } 
-          else if (panelNow === PANEL.MARKETPLACE && typeof syncMarketplaceContentWithLevels === "function") {
+        if (panelNow === PANEL.GAMES && typeof syncGameContentWithLevels === "function") {
+          syncGameContentWithLevels(v);
+        } 
+        else if (panelNow === PANEL.MARKETPLACE) {
+          if (field.key === "levels" && typeof syncMarketplaceContentWithLevels === "function") {
             syncMarketplaceContentWithLevels(v);
           }
-        };
+          if (field.key === "rounds" && typeof syncMarketplaceContentWithRounds === "function") {
+            syncMarketplaceContentWithRounds(v);
+          }
+        }
+      };
 
-        input.oninput = onLevelChange;
-        input.onchange = onLevelChange;
+      input.oninput = onChange;
+      input.onchange = onChange;
       } else {
         input.oninput = e => {
           draftData[field.key] = e.target.value;

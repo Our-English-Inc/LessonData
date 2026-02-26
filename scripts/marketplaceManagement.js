@@ -763,11 +763,7 @@
 
               selectedRows.forEach(r => {
                 const round = Number(r.round);
-
-                const selected = (r.selected || "")
-                  .split("|")
-                  .map(s => s.trim())
-                  .filter(Boolean);
+                const selected = (r.selected || "").split("|").map(s => s.trim()).filter(Boolean);
 
                 draftData.roundMap[round] = { selectedLessons: selected };
 
@@ -801,10 +797,6 @@
                     draftData.chapterMap[round][ch - 1] = true;
                   }
                 });
-
-                draftData.roundMap[round] = {
-                  selectedLessons: selected
-                };
 
                 let raw = r.value || "";
                 if (raw.startsWith('"') && raw.endsWith('"')) raw = raw.slice(1, -1);
