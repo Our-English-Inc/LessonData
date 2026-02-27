@@ -394,6 +394,47 @@ body {
 
 /*#endregion */
 
+/*#region ====== Review Content Editing ====== */
+
+.content-row textarea {
+  width: 100%;
+}
+
+.lesson-row {
+  margin-bottom: 18px;
+}
+
+.lesson-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+}
+
+.lesson-range-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #666;
+  margin: 0;
+}
+
+.lesson-toggle-btn {
+  border: none;
+  background: transparent;
+  font-size: 16px;
+  cursor: pointer;
+}
+
+.lesson-content-wrapper {
+  margin-top: 6px;
+}
+
+.lesson-content-wrapper.collapsed {
+  display: none;
+}
+
+/*#endregion */
+
 /*#region ====== Marketplace Content Editiong ====== */
 
 .round-section {

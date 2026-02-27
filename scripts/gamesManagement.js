@@ -208,7 +208,6 @@
         textarea.dataset.level = r.level;
         textarea.rows = 3;
         textarea.value = csvToTextarea(r.value);
-        textarea.style.width = "100%";
 
         if (readonlyMode) {
           textarea.disabled = true;
@@ -249,45 +248,35 @@
       for (let i = startIndex; i <= endIndex; i++) {
         const row = document.createElement("div");
         row.className = "content-row";
-        row.style.marginBottom = "18px";
+        row.classList.add("lesson-row");
 
         // Lesson header
         const header = document.createElement("div");
-        header.style.display = "flex";
-        header.style.justifyContent = "space-between";
-        header.style.alignItems = "center";
-        header.style.cursor = "pointer";
+        header.classList.add("lesson-header");
 
         const lessonTitle = document.createElement("div");
         lessonTitle.className = "lesson-range-title";
         const startLesson = (i - 1) * 5 + 1;
         const endLesson = startLesson + 4;
         lessonTitle.textContent = `Lesson ${startLesson}-${endLesson}`;
-        lessonTitle.style.fontSize = "13px";
-        lessonTitle.style.fontWeight = "600";
-        lessonTitle.style.color = "#666";
-        lessonTitle.style.margin = "0";
+        lessonTitle.className = "lesson-range-title";
 
         const toggleBtn = document.createElement("button");
         toggleBtn.type = "button";
         toggleBtn.textContent = "▾";
-        toggleBtn.style.border = "none";
-        toggleBtn.style.background = "transparent";
-        toggleBtn.style.fontSize = "16px";
-        toggleBtn.style.cursor = "pointer";
+        toggleBtn.classList.add("lesson-toggle-btn");
 
         header.appendChild(lessonTitle);
         header.appendChild(toggleBtn);
 
         // Content
         const contentWrapper = document.createElement("div");
-        contentWrapper.style.marginTop = "6px";
+        contentWrapper.classList.add("lesson-content-wrapper");
 
         const textarea = document.createElement("textarea");
         textarea.dataset.contentKey = key;
         textarea.dataset.level = i;
         textarea.rows = 3;
-        textarea.style.width = "100%";
 
         const rowData = allContentRows.find(r => Number(r.level) === i);
         textarea.value = csvToTextarea(rowData?.value);
@@ -335,12 +324,12 @@
 
         // Fold-textbox Button
         let collapsed = true;
-        contentWrapper.style.display = "none";
+        contentWrapper.classList.add("collapsed");
         toggleBtn.textContent = "▸";
 
         const toggle = () => {
           collapsed = !collapsed;
-          contentWrapper.style.display = collapsed ? "none" : "block";
+          contentWrapper.classList.toggle("collapsed", collapsed);
           toggleBtn.textContent = collapsed ? "▸" : "▾";
         };
 
