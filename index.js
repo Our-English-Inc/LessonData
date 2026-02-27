@@ -52,7 +52,6 @@ const PERMISSIONS = {
 };
 const FUNCTION_BASE = "https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net";
 
-let currentPanel = null;
 let pendingAction = null;
 
 //#endregion
@@ -620,21 +619,6 @@ window.parseValue = function(raw) {
 //#endregion
 
 //#region ====== Replace CSV ====== 
-
-// Download csv from Azure Blob Storage
-function downloadCSV(filename, csvText) {
-  const blob = new Blob([csvText], { type: "text/csv;charset=utf-8;" });
-  const url = URL.createObjectURL(blob);
-
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = filename;
-  document.body.appendChild(a);
-  a.click();
-
-  document.body.removeChild(a);
-  URL.revokeObjectURL(url);
-}
 
 // Serializes an array of objects into CSV format
 function toCSV(headers, rows) {

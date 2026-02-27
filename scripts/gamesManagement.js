@@ -2,7 +2,6 @@
   //#region ====== Variables ======
 
   let rvgames = [];
-  let panelKeys = [];
   let panelKeySet = new Set();
   let currentContentKeys = [];
   let gamesController = null;
@@ -15,12 +14,10 @@
   async function loadGameElementRules() {
     const rows = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameElementRule.csv?t=" + Date.now());
 
-    panelKeys = [];
     panelKeySet.clear();
 
     rows.forEach(r => {
       if (r.inPanel === "true") {
-        panelKeys.push(r.key);
         panelKeySet.add(r.key);
       }
     });
@@ -489,7 +486,6 @@
     if (toggle) {
       toggle.onchange = () => {
         game.active = toggle.checked;
-        console.log("Game active changed:", game.title, game.active);
       };
     }
   }

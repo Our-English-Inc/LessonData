@@ -2,9 +2,7 @@
   //#region ====== Variables ======
 
   let mpgames = [];
-  let panelKeys = [];
   let panelKeySet = new Set();
-  let currentContentKeys = [];
   let marketplaceController = null;
 
   //#endregion
@@ -15,12 +13,10 @@
   async function loadMarketplaceElementRules() {
     const rows = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/MarketplaceElementRule.csv?t=" + Date.now());
 
-    panelKeys = [];
     panelKeySet.clear();
 
     rows.forEach(r => {
       if (r.inPanel === "true") {
-        panelKeys.push(r.key);
         panelKeySet.add(r.key);
       }
     });
@@ -671,28 +667,6 @@
       : "";
   }
 
-  // Combine all word strings to output - Lesson Merge Layout
-  function generateRoundMergedString_lessonMerge(round) {
-    if (!draftData.roundMap || !draftData.lessonContentMap) return "";
-
-    const selected = draftData.roundMap[round]?.selectedLessons || [];
-    const merged = [];
-
-    selected.forEach(code => {
-      const parsed = parseLessonCode(code);
-      if (!parsed) return;
-
-      const { level, lesson } = parsed;
-      const words = getLessonWords(level, lesson);
-
-      if (words.length) merged.push(...words);
-    });
-
-    return merged.length
-      ? merged.map(w => `${w};`).join(" ")
-      : "";
-  }
-
   // Serializes chapterMerge selection data into selected.csv format
   function collectSelectedCSV() {
     if (!draftData.chapterMap) return "round,selected,value\n";
@@ -945,7 +919,6 @@
     if (toggle) {
       toggle.onchange = () => {
         game.active = toggle.checked;
-        console.log("Game active changed:", game.title, game.active);
       };
     }
   }
@@ -956,7 +929,6 @@
 
   (() => {
     const panel = getPanel();
-
     if (panel !== PANEL.MARKETPLACE) return;
 
     async function initMarketplacePage() {
