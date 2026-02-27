@@ -11,6 +11,7 @@
 
   //#region ====== CSV ======
 
+  // Loads MarketplaceElementRule.csv and extracts keys used in panel display
   async function loadMarketplaceElementRules() {
     const rows = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/MarketplaceElementRule.csv?t=" + Date.now());
 
@@ -25,13 +26,14 @@
     });
   }
 
+  // Reads marketplace table header configuration from DOM and returns ordered keys
   function getPanelHeaderKeys() {
-  const ths = document
-    .querySelectorAll("#thead-marketplace th[data-key]");
+    const ths = document.querySelectorAll("#thead-marketplace th[data-key]");
 
     return Array.from(ths).map(th => th.dataset.key);
   }
 
+  // Loads all marketplace config.csv files and converts them into structured game objects
   async function loadMarketplaceFromCSV() {
     const gameDirs = [
       "WordSplash",
@@ -58,6 +60,7 @@
     return games;
   }
 
+  // Checks whether marketplace content.csv exists for the given game
   async function hasMarketplaceContentCSV(game) {
     const url = `https://lessondatamanagement.blob.core.windows.net/lessondata/current/marketplace/${game.key}/content.csv`;
     try {
@@ -68,6 +71,7 @@
     }
   }
 
+  // Loads marketplace content.csv for the given game
   async function loadMarketplaceContentCSV(game) {
     const url = `https://lessondatamanagement.blob.core.windows.net/lessondata/current/marketplace/${game.key}/content.csv?t=${Date.now()}`;
 
@@ -78,6 +82,7 @@
     }
   }
 
+  // Loads selected.csv which stores round-level selection data
   async function loadMarketplaceSelectedCSV(game) {
     const url = `https://lessondatamanagement.blob.core.windows.net/lessondata/current/marketplace/${game.key}/selected.csv?t=${Date.now()}`;
 
@@ -92,14 +97,17 @@
 
   //#region ====== LessonMerge Layout ======
 
+  // Pads a number to two digits with leading zero
   function pad2(n) {
     return String(n).padStart(2, "0");
   }
 
+  // Generates lesson code in format "level-lesson" (e.g., 1-01)
   function makeLessonCode(level, lesson) {
     return `${level}-${pad2(lesson)}`; // e.g. 1-01, 3-12
   }
 
+  // Parses lesson code string into level and lesson numbers
   function parseLessonCode(code) {
     const [lv, ls] = (code || "").split("-");
     const level = Number(lv);
@@ -108,16 +116,15 @@
     return { level, lesson };
   }
 
+  // Retrieves and splits stored lesson content into individual words
   function getLessonWords(level, lesson) {
     const raw = (draftData.lessonContentMap?.[level]?.[lesson] || "").trim();
     if (!raw) return [];
 
-    return raw
-      .split(/[|;\n,，；]+/g)
-      .map(s => s.trim())
-      .filter(Boolean);
+    return raw.split(/[|;\n,，；]+/g).map(s => s.trim()).filter(Boolean);
   }
 
+  // Ensures roundMergedValue structure exists in draftData
   function ensureRoundMergedValue() {
     if (!draftData.roundMergedValue) draftData.roundMergedValue = {};
   }
@@ -170,6 +177,7 @@
     return html;
   }
 
+  // Generates editor field schema based on MarketplaceElementRule.csv
   async function getEditorFieldsFromRules(game) {
     const rows = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/MarketplaceElementRule.csv?t=" + Date.now());
 
@@ -193,6 +201,7 @@
     });
   }
 
+  // Renders simple round-based content editor UI
   function renderEditorContent(contents, contentKeys, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
@@ -217,10 +226,8 @@
 
       rows.forEach(r => {
         const round = Number(r.round);
-
         const rowDiv = document.createElement("div");
         rowDiv.className = "content-row";
-
         const textarea = document.createElement("textarea");
         textarea.dataset.contentKey = key;
         textarea.dataset.round = r.round;
@@ -234,7 +241,6 @@
 
         rowDiv.appendChild(document.createElement("div")).textContent = `Round ${round}`;
         rowDiv.appendChild(textarea);
-
         block.appendChild(rowDiv);
       });
 
@@ -242,6 +248,7 @@
     });
   }
 
+  // Generates chapterMerge layout UI and updates round preview dynamically
   window.syncMarketplaceContentWithRounds = function (roundCount, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
@@ -352,6 +359,7 @@
     container.appendChild(chapterWrapper);
   };
 
+  // Generates lessonMerge layout UI with level and lesson grouping
   window.syncMarketplaceContentWithRounds_lessonMerge = function(roundCount, readonlyMode = false) {
     // if preview box is freely editable
     const isFreeEdit = editingTarget?.layout === "lessonMergeFree";
@@ -396,7 +404,6 @@
       const previewTextarea = document.createElement("textarea");
       previewTextarea.rows = 4;
       previewTextarea.className = "round-preview";
-      //previewTextarea.readOnly = true;
       previewTextarea.spellcheck = false;
 
       function renderPreview() {
@@ -686,6 +693,7 @@
       : "";
   }
 
+  // Serializes chapterMerge selection data into selected.csv format
   function collectSelectedCSV() {
     if (!draftData.chapterMap) return "round,selected,value\n";
 
@@ -705,6 +713,7 @@
     return "round,selected,value\n" + rows.join("\n");
   }
 
+  // Serializes lessonMerge selection data into selected.csv format
   function collectSelectedCSV_lessonMerge() {
     if (!draftData.roundMap) return "round,selected,value\n";
 

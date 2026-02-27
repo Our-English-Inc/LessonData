@@ -11,6 +11,7 @@
 
   //#region ====== CSV ======
 
+  // Loads GameElementRule.csv and extracts keys used in panel display
   async function loadGameElementRules() {
     const rows = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameElementRule.csv?t=" + Date.now());
 
@@ -25,13 +26,14 @@
     });
   }
 
+  // Reads table header configuration from DOM and returns ordered data keys
   function getPanelHeaderKeys() {
-  const ths = document
-    .querySelectorAll("#thead-games th[data-key]");
+    const ths = document.querySelectorAll("#thead-games th[data-key]");
 
     return Array.from(ths).map(th => th.dataset.key);
   }
 
+  // Loads all game config.csv files and converts them into structured game objects
   async function loadGamesFromCSV() {
     const gameDirs = [
       "WordSplash",
@@ -58,6 +60,7 @@
     return games;
   }
 
+  // Checks whether a content.csv file exists for a given game
   async function hasGameContentCSV(game) {
     const url = `https://lessondatamanagement.blob.core.windows.net/lessondata/current/games/${game.key}/content.csv`;
     try {
@@ -68,6 +71,7 @@
     }
   }
 
+  // Loads game content.csv and returns parsed rows
   async function loadGameContentCSV(game) {
     const url = `https://lessondatamanagement.blob.core.windows.net/lessondata/current/games/${game.key}/content.csv?t=${Date.now()}`;
 
@@ -126,6 +130,7 @@
     return html;
   }
 
+  // Generates editor field schema based on GameElementRule.csv
   async function getEditorFieldsFromRules(game) {
     const rows = await loadCSV("https://lessondatamanagement.blob.core.windows.net/lessondata/current/GameElementRule.csv?t=" + Date.now());
 
@@ -168,17 +173,21 @@
     });
   }
 
+  // Renders content blocks inside edit modal based on loaded content data
   function renderEditorContent(contents, contentKeys, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
 
+    // Clear previous content and exit if empty
     container.innerHTML = "";
     if (Object.keys(contents).length === 0) return;
 
+    // Create title for content section
     const title = document.createElement("h3");
     title.textContent = "Content";
     container.appendChild(title);
 
+    // Render content blocks grouped by content key
     contentKeys.forEach(({ key, label }) => {
       const rows = contents[key];
       if (!rows) return;
@@ -190,6 +199,7 @@
       h4.textContent = label;
       block.appendChild(h4);
 
+      // Create textarea rows for each level entry
       rows.forEach(r => {
         const level = Number(r.level);
 
@@ -210,7 +220,6 @@
 
         rowDiv.appendChild(document.createElement("div")).textContent = `Level ${level}`;
         rowDiv.appendChild(textarea);
-
         block.appendChild(rowDiv);
       });
 
@@ -218,6 +227,7 @@
     });
   }
 
+  // Dynamically generates editable content UI based on selected level range
   window.syncGameContentWithLevels = function (levelCount, readonlyMode = false) {
     const container = document.getElementById("edit-content");
     if (!container) return;
@@ -238,12 +248,13 @@
       const startIndex = (eduLevel - 1) * 6 + 1;
       const endIndex = startIndex + 5;
 
+      // Generate collapsible lesson section
       for (let i = startIndex; i <= endIndex; i++) {
         const row = document.createElement("div");
         row.className = "content-row";
         row.style.marginBottom = "18px";
 
-        // ===== Lesson header =====
+        // Lesson header
         const header = document.createElement("div");
         header.style.display = "flex";
         header.style.justifyContent = "space-between";
@@ -271,7 +282,7 @@
         header.appendChild(lessonTitle);
         header.appendChild(toggleBtn);
 
-        // ===== Content =====
+        // Content
         const contentWrapper = document.createElement("div");
         contentWrapper.style.marginTop = "6px";
 
@@ -306,8 +317,7 @@
           });
         }
 
-        const isSentenceScramble =
-          window.currentEditingGameKey === "SentenceScramble";
+        const isSentenceScramble = window.currentEditingGameKey === "SentenceScramble";
 
         if (!isSentenceScramble || readonlyMode) {
           textarea.disabled = true;
@@ -326,7 +336,7 @@
 
         contentWrapper.appendChild(textarea);
 
-        // ===== Fold-textbox Button =====
+        // Fold-textbox Button
         let collapsed = true;
         contentWrapper.style.display = "none";
         toggleBtn.textContent = "▸";
