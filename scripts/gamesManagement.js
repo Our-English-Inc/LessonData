@@ -423,7 +423,13 @@
         desc: "This will restore the game to the most recent safe version. Any unsaved changes will be lost. This action takes effect immediately.",
         onConfirm: async () => {
           try {
-            await restoreCSV(`games/${game.key}`);
+            const ok = await restoreCSV(`games/${game.key}`);
+            if (ok) {
+              await gamesController.reloadAndRedraw(async () => {
+                rvgames = await loadGamesFromCSV();
+                return rvgames;
+              });
+            }
           } catch (e) {
             alert("Restore failed. Check server.");
           }

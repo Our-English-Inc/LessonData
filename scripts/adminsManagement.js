@@ -134,7 +134,13 @@
         desc: "This will restore ALL the admin accounts to the most recent safe version. ALL changes since last safe version will be lost. This action takes effect immediately.",
         onConfirm: async () => {
           try {
-            await restoreCSV("AdminData");
+            const ok = await restoreCSV("AdminData");
+            if (ok) {
+              await adminsController.reloadAndRedraw(async () => {
+                admins = await loadAdminsFromCSV();
+                return admins;
+              });
+            }
           } catch (e) {
             alert("Restore failed. Check server.");
           }

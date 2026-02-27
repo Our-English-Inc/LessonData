@@ -351,6 +351,29 @@ function createFooterController({ onPageChange }) {
   };
 }
 
+// Displays temporary footer message (success or error)
+window.showFooterMessage = function(message, type = "success", duration = 2000) {
+  const el = document.getElementById("footer-message");
+  if (!el) return;
+
+  el.textContent = message;
+  el.classList.remove("hidden", "error");
+  el.classList.add("show");
+
+  if (type === "error") {
+    el.classList.add("error");
+  }
+
+  clearTimeout(el._timer);
+
+  el._timer = setTimeout(() => {
+    el.classList.remove("show");
+    setTimeout(() => {
+      el.classList.add("hidden");
+    }, 250);
+  }, duration);
+};
+
 //#endregion
 
 //#region ====== Action Confirmation Modal ======
@@ -759,25 +782,30 @@ async function saveAdminsToServer(admins) {
   }
 }
 
-// Restore Safe version
+// Restore Safe version and return success state
 async function restoreCSV(target) {
-  const res = await fetch(
-    "https://oe-game-test-function-aqg4hed8gqcxb6ej.eastus-01.azurewebsites.net/api/restoreSafeCSV",
-    {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ target })
+  try {
+    const res = await fetch(
+      `${FUNCTION_BASE}/api/restoreSafeCSV`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ target })
+      }
+    );
+
+    if (!res.ok) {
+      throw new Error("Restore failed");
     }
-  );
 
-  if (!res.ok) {
-    alert("Restore failed");
-    return;
+    showFooterMessage("✓ Restored to Safe Version");
+    return true;
+
+  } catch (err) {
+    console.error(err);
+    showFooterMessage("Restore failed. Check server.", "error", 3000);
+    return false;
   }
-
-  location.reload();
 }
 
 //#endregion
