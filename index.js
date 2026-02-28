@@ -139,6 +139,7 @@ function applyPermissions(role) {
     toggleGroup("gameRestoreBtn", p.restore);
     toggleGroup("gameDeleteBtn", p.delete);
     toggleGroup("gameViewBtn", p.view);
+    toggle("btn-admins", p.adminPanel);
   }
 }
 
@@ -155,9 +156,9 @@ function getPanel() {
 function setupIndexUI({ gamesCount = 0, adminsCount = 0, marketplaceCount = 0 }) {
   const panel = getPanel();
 
-  btnGames.style.display = "";
-  btnMarketplace.style.display = "";
-  btnAdmins.style.display = "";
+  btnGames.classList.remove("hidden");
+  btnMarketplace.classList.remove("hidden");
+  btnAdmins.classList.remove("hidden");
 
   if (panel === PANEL.GAMES) {
     // Header
@@ -472,7 +473,14 @@ function openEditModal({ title, data, fields, onSave, readonlyMode = false }) {
       });
 
       input.onchange = e => {
-        draftData[field.key] = Number(e.target.value);
+        const value = e.target.value;
+
+        // Only convert to number for numeric fields
+        if (field.key === "levels" || field.key === "rounds" || field.key === "eduLevel") {
+          draftData[field.key] = Number(value);
+        } else {
+          draftData[field.key] = value;
+        }
 
         if (typeof syncGameContentWithLevels === "function") {
           syncGameContentWithLevels(draftData.levels);
